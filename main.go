@@ -16,13 +16,13 @@ func main()  {
 	signal.Notify(ch, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	fmt.Println("start")
 
-	client:= dtssdk.NewDTSClient("192.168.0.50")
+	client:= dtssdk.NewDTSClient("127.0.0.1")
 
-	client.CallConnected(func() {
-		fmt.Println("连接成功!")
+	client.CallConnected(func(addr string) {
+		fmt.Println("连接成功:%s!",addr)
 	})
-	client.CallDisconnected(func() {
-		fmt.Println("断开连接!")
+	client.CallDisconnected(func(addr string) {
+		fmt.Println("断开连接:%s!",addr)
 	})
 	time.Sleep(time.Second*2)
 

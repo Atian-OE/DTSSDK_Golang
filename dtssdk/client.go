@@ -39,8 +39,8 @@ type DTSSDKClient struct{
 	addr string//地址
 
 
-	_connected_action         func()                               //连接到服务器的回调
-	_disconnected_action      func()                               //断开连接到服务器的回调
+	_connected_action         func(string)                               //连接到服务器的回调
+	_disconnected_action      func(string)                               //断开连接到服务器的回调
 	_ZoneTempNotifyEnable    bool                                 //接收分区温度更新的通知
 	_ZoneTempNotify          func(*model.ZoneTempNotify,error)    //分区温度更新
 	_ZoneAlarmNotifyEnable   bool                                 //接收温度警报的通知

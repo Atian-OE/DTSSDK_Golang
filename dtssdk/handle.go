@@ -26,7 +26,7 @@ func (self*DTSSDKClient)tcp_handle(msg_id model.MsgID, data []byte,conn net.Conn
 		self.connected=true
 		go self.SetDeviceRequest()
 		if(self._connected_action!=nil){
-			self._connected_action()
+			self._connected_action(self.addr)
 		}
 
 	case model.MsgID_DisconnectID:
@@ -39,7 +39,7 @@ func (self*DTSSDKClient)tcp_handle(msg_id model.MsgID, data []byte,conn net.Conn
 		}
 
 		if(self._disconnected_action!=nil){
-			self._disconnected_action()
+			self._disconnected_action(self.addr)
 		}
 
 	case model.MsgID_ZoneTempNotifyID:
@@ -116,12 +116,12 @@ func (self*DTSSDKClient)SetDeviceRequest() (*model.SetDeviceReply,error) {
 }
 
 //回调连接到服务器
-func (self*DTSSDKClient)CallConnected(call func())  {
+func (self*DTSSDKClient)CallConnected(call func(string))  {
 	self._connected_action=call
 }
 
 //回调断开连接服务器
-func (self*DTSSDKClient)CallDisconnected(call func())  {
+func (self*DTSSDKClient)CallDisconnected(call func(string))  {
 	self._disconnected_action=call
 }
 
