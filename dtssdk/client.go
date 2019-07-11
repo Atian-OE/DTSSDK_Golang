@@ -1,9 +1,9 @@
 package dtssdk
 
 import (
-	"DTSSDK/dtssdk/codec"
-	"DTSSDK/dtssdk/model"
-	"DTSSDK/dtssdk/utils"
+	"DTSSDK_Golang/dtssdk/codec"
+	"DTSSDK_Golang/dtssdk/model"
+	"DTSSDK_Golang/dtssdk/utils"
 	"bytes"
 	"container/list"
 	"fmt"

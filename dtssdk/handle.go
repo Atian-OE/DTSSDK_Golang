@@ -1,7 +1,7 @@
 package dtssdk
 
 import (
-	"DTSSDK/dtssdk/model"
+	"DTSSDK_Golang/dtssdk/model"
 	"errors"
 	"github.com/golang/protobuf/proto"
 	"net"

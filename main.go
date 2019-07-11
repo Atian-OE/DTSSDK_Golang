@@ -1,8 +1,8 @@
 package main
 
 import (
-	"DTSSDK/dtssdk"
-	"DTSSDK/dtssdk/model"
+	"DTSSDK_Golang/dtssdk"
+	"DTSSDK_Golang/dtssdk/model"
 	"fmt"
 	"os"
 	"os/signal"

@@ -1,8 +1,8 @@
 package codec
 
 import (
-	"DTSSDK/dtssdk/model"
-	"DTSSDK/dtssdk/utils"
+	"DTSSDK_Golang/dtssdk/model"
+	"DTSSDK_Golang/dtssdk/utils"
 	"github.com/golang/protobuf/proto"
 )
 
