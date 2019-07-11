@@ -1,0 +1,640 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="356c0883-c9cf-4b2d-ab0f-1e55cd9f759b" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../RSMSService/c_shape/.vs/c_shape/v15/.suo" beforeDir="false" afterPath="$PROJECT_DIR$/../../RSMSService/c_shape/.vs/c_shape/v15/.suo" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../RSMSService/c_shape/.vs/c_shape/v15/Server/sqlite3/storage.ide-shm" beforeDir="false" afterPath="$PROJECT_DIR$/../../RSMSService/c_shape/.vs/c_shape/v15/Server/sqlite3/storage.ide-shm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../RSMSService/c_shape/.vs/c_shape/v15/Server/sqlite3/storage.ide-wal" beforeDir="false" afterPath="$PROJECT_DIR$/../../RSMSService/c_shape/.vs/c_shape/v15/Server/sqlite3/storage.ide-wal" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../RSMSService/c_shape/demo/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../RSMSService/c_shape/demo/Program.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../RSMSService/c_shape/demo/bin/Debug/c_shape.exe" beforeDir="false" afterPath="$PROJECT_DIR$/../../RSMSService/c_shape/demo/bin/Debug/c_shape.exe" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../RSMSService/c_shape/demo/bin/Debug/c_shape.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/../../RSMSService/c_shape/demo/bin/Debug/c_shape.pdb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../RSMSService/c_shape/demo/obj/Debug/c_shape.exe" beforeDir="false" afterPath="$PROJECT_DIR$/../../RSMSService/c_shape/demo/obj/Debug/c_shape.exe" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../RSMSService/c_shape/demo/obj/Debug/c_shape.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/../../RSMSService/c_shape/demo/obj/Debug/c_shape.pdb" afterDir="false" />
+    </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="DatabaseView">
+    <option name="SHOW_INTERMEDIATE" value="true" />
+    <option name="GROUP_DATA_SOURCES" value="true" />
+    <option name="GROUP_SCHEMA" value="true" />
+    <option name="GROUP_CONTENTS" value="false" />
+    <option name="SORT_POSITIONED" value="false" />
+    <option name="SHOW_EMPTY_GROUPS" value="false" />
+    <option name="AUTO_SCROLL_FROM_SOURCE" value="false" />
+    <option name="HIDDEN_KINDS">
+      <set />
+    </option>
+    <expand />
+    <select />
+  </component>
+  <component name="FavoritesManager">
+    <favorites_list name="RSMSService" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/go.mod">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="209">
+              <caret line="11" column="73" selection-start-line="11" selection-start-column="73" selection-end-line="11" selection-end-column="73" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/main.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="172">
+              <caret line="40" column="87" selection-start-line="40" selection-start-column="87" selection-end-line="40" selection-end-column="87" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/dtssdk/client.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="950">
+              <caret line="61" column="23" selection-start-line="61" selection-start-column="9" selection-end-line="61" selection-end-column="23" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/dtssdk/handle.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1919">
+              <caret line="106" selection-start-line="106" selection-end-line="106" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/dtssdk/model/message.pb.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="8531">
+              <caret line="453" column="101" selection-start-line="453" selection-start-column="4" selection-end-line="453" selection-end-column="101" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/dtssdk/codec/sdk_codec.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="152">
+              <caret line="12" column="22" selection-start-line="12" selection-start-column="22" selection-end-line="12" selection-end-column="22" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/dtssdk/model/message.proto">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="266">
+              <caret line="14" column="20" selection-start-line="14" selection-start-column="4" selection-end-line="14" selection-end-column="20" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/dtssdk/utils/conv.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1216">
+              <caret line="68" column="15" selection-start-line="68" selection-start-column="5" selection-end-line="68" selection-end-column="15" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="CSS File" />
+        <option value="HTML File" />
+        <option value="Go File" />
+      </list>
+    </option>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>DeleteDFNotify</find>
+      <find>DeploymentRequest</find>
+      <find>DeploymentReply</find>
+      <find>WithdrawalRequest</find>
+      <find>WithdrawalReply</find>
+      <find>ResetAlarmRequest</find>
+      <find>ResetAlarmReply</find>
+      <find>CloseAlarmSoundRequest</find>
+      <find>CloseAlarmSoundReply</find>
+      <find>HeartBeat</find>
+      <find>GetAllDefenceZoneReply</find>
+      <find>GetDefenceZones</find>
+      <find>IntToBytes</find>
+      <find>clients</find>
+      <find>data</find>
+      <find>sdk_model.DefenceZone</find>
+      <find>deployment</find>
+      <find>GetCCSqlInstance</find>
+      <find>Store</find>
+      <find>connect</find>
+      <find>ZoneTempNotify</find>
+      <find>GetHistoryRequest</find>
+      <find>NewConn</find>
+      <find>CallConnected</find>
+      <find>SetDeviceRequest</find>
+      <find>wait_pack_list_mu</find>
+      <find>connected</find>
+      <find>json</find>
+      <find>WaitPack</find>
+      <find>wait_pack_list</find>
+    </findStrings>
+    <replaceStrings>
+      <replace />
+    </replaceStrings>
+    <dirStrings>
+      <dir>D:\git\GoModule\pkg\mod\github.com\davyxu\cellnet@v0.0.0-20190322215501-9f4fcb8a7866</dir>
+      <dir>D:\git\GoModule\pkg\mod\fyne.io\fyne@v1.0.0</dir>
+      <dir>D:\git\GoModule\pkg\mod\fyne.io\fyne@v1.0.1</dir>
+      <dir>D:\git\GoModule\pkg\mod\github.com\sciter-sdk\go-sciter@v0.5.0</dir>
+      <dir>D:\git\RemoteDesktop\src\kcp</dir>
+      <dir>D:\git\RemoteDesktop\src</dir>
+      <dir>D:\git\RemoteDesktop\webview</dir>
+      <dir>C:\Go\src</dir>
+      <dir>D:\git\GoModule\pkg\mod\github.com\asaskevich\!event!bus@v0.0.0-20180315140547-d46933a94f05</dir>
+      <dir>D:\git\GoModule\pkg\mod\github.com\veandco\go-sdl2@v0.3.0</dir>
+      <dir>D:\git\GoModule\pkg\mod\github.com\!geert!johan\go.rice@v1.0.0</dir>
+      <dir>D:\git\GoModule\pkg\mod\github.com\lxn\win@v0.0.0-20190311093451-0040366d7450</dir>
+      <dir>D:\git\RemoteDesktop</dir>
+      <dir>D:\git\GoModule\pkg\mod\github.com\veandco\go-sdl2@v0.3.0\sdl</dir>
+      <dir>D:\git\RSMSService\src\model</dir>
+      <dir>D:\git\RSMSService\src</dir>
+      <dir>H:\git\RSMSService\src</dir>
+      <dir>H:\git\RSMSService\src\server\core</dir>
+    </dirStrings>
+  </component>
+  <component name="GOROOT" path="C:/Go" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/src/tools/config.go" />
+        <option value="$PROJECT_DIR$/src/model/zone/defence_zone.go" />
+        <option value="$PROJECT_DIR$/src/model/zone/relay_zone.go" />
+        <option value="$PROJECT_DIR$/src/model/mq_model/fiber_status.go" />
+        <option value="$PROJECT_DIR$/src/model/mq_model/alarm.go" />
+        <option value="$PROJECT_DIR$/src/model/history/operation_log.go" />
+        <option value="$PROJECT_DIR$/src/model/history/alarm_log.go" />
+        <option value="$PROJECT_DIR$/src/model/data_source/binding_camera.go" />
+        <option value="$PROJECT_DIR$/src/model/fiber_status.go" />
+        <option value="$PROJECT_DIR$/src/model/map_point.go" />
+        <option value="$PROJECT_DIR$/src/model/user.go" />
+        <option value="$PROJECT_DIR$/go.sum" />
+        <option value="$PROJECT_DIR$/src/server/media/ffmpeg_conv.go" />
+        <option value="$PROJECT_DIR$/src/server/web/web.go" />
+        <option value="$PROJECT_DIR$/src/server/web/user_ctl.go" />
+        <option value="$PROJECT_DIR$/src/server/web/relay_zone_ctl.go" />
+        <option value="$PROJECT_DIR$/src/server/web/record_ctl.go" />
+        <option value="$PROJECT_DIR$/src/server/web/map_ctl.go" />
+        <option value="$PROJECT_DIR$/src/server/web/history_ctl.go" />
+        <option value="$PROJECT_DIR$/src/server/web/channel_ctl.go" />
+        <option value="$PROJECT_DIR$/src/server/web/camera_ctl.go" />
+        <option value="$PROJECT_DIR$/src/server/web/alarm_point_ctl.go" />
+        <option value="$PROJECT_DIR$/src/server/media/media_mapping.go" />
+        <option value="$PROJECT_DIR$/src/server/core/map_point.go" />
+        <option value="$PROJECT_DIR$/src/server/core/device_online.go" />
+        <option value="$PROJECT_DIR$/src/model/alarm_point.go" />
+        <option value="$PROJECT_DIR$/src/model/data_source/binding_channel.go" />
+        <option value="$PROJECT_DIR$/src/tools/conv.go" />
+        <option value="$PROJECT_DIR$/src/server/database/ccsql.go" />
+        <option value="$PROJECT_DIR$/src/model/system.go" />
+        <option value="$PROJECT_DIR$/src/server/web/system_ctl.go" />
+        <option value="$PROJECT_DIR$/src/server/web/df_zone_ctl.go" />
+        <option value="$PROJECT_DIR$/src/server/core/defence_zone.go" />
+        <option value="$PROJECT_DIR$/src/server/core/core.go" />
+        <option value="$PROJECT_DIR$/src/model/proto/message.proto" />
+        <option value="$PROJECT_DIR$/src/model/proto/proto.go" />
+        <option value="$PROJECT_DIR$/src/codec/sdk_codec.go" />
+        <option value="$PROJECT_DIR$/src/model/sdk_model/model.go" />
+        <option value="$PROJECT_DIR$/src/server/sdk/tcpserver.go" />
+        <option value="$PROJECT_DIR$/src/server/core/sdk.go" />
+        <option value="$PROJECT_DIR$/src/data/datacentre.go" />
+        <option value="$PROJECT_DIR$/src/model/sdk/client.go" />
+        <option value="$PROJECT_DIR$/src/handle/sdk_handle.go" />
+        <option value="$PROJECT_DIR$/src/server/mq_server/mq_server.go" />
+        <option value="$PROJECT_DIR$/go.mod" />
+        <option value="$PROJECT_DIR$/../DTSSDK/go.mod" />
+        <option value="$PROJECT_DIR$/dtssdk/model/message.proto" />
+        <option value="$PROJECT_DIR$/dtssdk/client.go" />
+        <option value="$PROJECT_DIR$/dtssdk/codec/sdk_codec.go" />
+        <option value="$PROJECT_DIR$/dtssdk/handle.go" />
+        <option value="$PROJECT_DIR$/main.go" />
+      </list>
+    </option>
+  </component>
+  <component name="MacroExpansionManager">
+    <option name="directoryName" value="QNQxvuMP" />
+  </component>
+  <component name="ProjectFrameBounds">
+    <option name="x" value="534" />
+    <option name="y" value="68" />
+    <option name="width" value="1278" />
+    <option name="height" value="890" />
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectView">
+    <navigator proportions="" version="1">
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="golang" type="b2602c69:ProjectViewProjectNode" />
+              <item name="golang" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="golang" type="b2602c69:ProjectViewProjectNode" />
+              <item name="golang" type="462c0819:PsiDirectoryNode" />
+              <item name="bin" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="golang" type="b2602c69:ProjectViewProjectNode" />
+              <item name="golang" type="462c0819:PsiDirectoryNode" />
+              <item name="dtssdk" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+      <pane id="Scope" />
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="DefaultGoTemplateProperty" value="Go File" />
+    <property name="DefaultHtmlFileTemplate" value="HTML File" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="configurable.Global.GOPATH.is.expanded" value="true" />
+    <property name="configurable.Module.GOPATH.is.expanded" value="true" />
+    <property name="configurable.Project.GOPATH.is.expanded" value="true" />
+    <property name="go.gopath.indexing.explicitly.defined" value="true" />
+    <property name="go.import.settings.migrated" value="true" />
+    <property name="go.sdk.automatically.set" value="true" />
+    <property name="go.vendoring.notification.had.been.shown" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="list.type.of.created.stylesheet" value="CSS" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="restartRequiresConfirmation" value="false" />
+    <property name="settings.editor.selected.configurable" value="com.goide.configuration.GoLibrariesConfigurableProvider" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="H:\git\RSMSService\src\model\proto" />
+      <recent name="D:\git\RSMSService\src\server\web" />
+      <recent name="D:\git\RSMSService\src" />
+      <recent name="D:\git\RSMSService\src\server\media" />
+      <recent name="D:\git\RSMSService\src\model" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="H:\git\AtenSDK\DTS\golang\dtssdk\utils" />
+      <recent name="H:\git\AtenSDK\DTS\golang\dtssdk" />
+      <recent name="H:\git\AtenSDK\DTS\golang\dtssdk\model" />
+      <recent name="H:\git\RSMSService\src\model\proto" />
+      <recent name="D:\git\RSMSService\src\model\format_time" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager">
+    <configuration name="DTSSDK" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true">
+      <module name="DTSSDK" />
+      <working_directory value="$PROJECT_DIR$/bin" />
+      <go_parameters value="-i" />
+      <kind value="FILE" />
+      <filePath value="H:\git\AtenSDK\DTS\golang\main.go" />
+      <output_directory value="$PROJECT_DIR$/bin" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
+      <module name="DTSSDK" />
+      <working_directory value="$PROJECT_DIR$/" />
+      <go_parameters value="-i" />
+      <kind value="FILE" />
+      <filePath value="$PROJECT_DIR$/" />
+      <package value="AtianSDK" />
+      <directory value="$PROJECT_DIR$/" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="GoTestRunConfiguration" factoryName="Go Test">
+      <module name="DTSSDK" />
+      <working_directory value="$PROJECT_DIR$/" />
+      <go_parameters value="-i" />
+      <framework value="gotest" />
+      <kind value="DIRECTORY" />
+      <package value="AtianSDK" />
+      <directory value="$PROJECT_DIR$/" />
+      <filePath value="$PROJECT_DIR$/" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Go Build.DTSSDK" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="TodoView" selected-index="3">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="534" y="68" width="1278" height="890" extended-state="0" />
+    <editor active="true" />
+    <layout>
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.4978261" visible="true" weight="0.27011493" />
+      <window_info id="Structure" order="1" sideWeight="0.5008606" side_tool="true" weight="0.25746268" />
+      <window_info id="Favorites" order="2" sideWeight="0.5021739" side_tool="true" weight="0.33844912" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32539684" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.3227513" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.40608466" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" sideWeight="0.49850747" weight="0.3290993" />
+      <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Database Changes" order="8" />
+      <window_info anchor="bottom" id="Version Control" order="9" sideWeight="0.49925372" weight="0.3290993" />
+      <window_info anchor="bottom" id="Terminal" order="10" sideWeight="0.49925372" weight="0.23809524" />
+      <window_info anchor="bottom" id="Event Log" order="11" sideWeight="0.50149256" side_tool="true" weight="0.3290993" />
+      <window_info anchor="right" id="Cargo" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="Database" order="3" weight="0.32956383" />
+    </layout>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="VgoProject">
+    <integration-enabled>true</integration-enabled>
+    <proxy>https://goproxy.io</proxy>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/../GoModule/pkg/mod/github.com/henrylee2cn/teleport@v5.0.0+incompatible/codec/codec.go</url>
+          <line>85</line>
+          <option name="timeStamp" value="6" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/../GoModule/pkg/mod/github.com/henrylee2cn/teleport@v5.0.0+incompatible/socket/socket.go</url>
+          <line>200</line>
+          <option name="timeStamp" value="10" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/../GoModule/pkg/mod/github.com/faiface/pixel@v0.8.0/pixelgl/window.go</url>
+          <line>92</line>
+          <option name="timeStamp" value="24" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/../GoModule/pkg/mod/github.com/faiface/mainthread@v0.0.0-20171120011319-8b78f0a41ae3/mainthread.go</url>
+          <line>62</line>
+          <option name="timeStamp" value="44" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+    <watches-manager>
+      <configuration name="GoApplicationRunConfiguration">
+        <watch expression="slice[29000]" language="go" />
+      </configuration>
+    </watches-manager>
+  </component>
+  <component name="debuggerHistoryManager">
+    <expressions id="watch">
+      <expression>
+        <expression-string>slice[29000]</expression-string>
+        <language-id>go</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>slice[19000]</expression-string>
+        <language-id>go</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>slice[9000]</expression-string>
+        <language-id>go</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>slice[7000]</expression-string>
+        <language-id>go</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>slice[6000]</expression-string>
+        <language-id>go</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>g.game.img[6000]</expression-string>
+        <language-id>go</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>g.game.img[5000]</expression-string>
+        <language-id>go</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>img.Pix[5100]</expression-string>
+        <language-id>go</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>g.game.img[5100]</expression-string>
+        <language-id>go</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+    </expressions>
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/dtssdk/server/web/web.go" />
+    <entry file="file://$PROJECT_DIR$/../GoModule/pkg/mod/github.com/go-pg/pg@v8.0.4+incompatible/base.go" />
+    <entry file="file://$PROJECT_DIR$/dtssdk/model/system.go" />
+    <entry file="file://$PROJECT_DIR$/dtssdk/model/data_source/binding_channel.go" />
+    <entry file="file://$PROJECT_DIR$/dtssdk/model/mq_model/fiber_status.go" />
+    <entry file="file://$PROJECT_DIR$/../GoModule/pkg/mod/github.com/asaskevich/!event!bus@v0.0.0-20180315140547-d46933a94f05/event_bus.go" />
+    <entry file="file://$PROJECT_DIR$/dtssdk/server/core/core.go" />
+    <entry file="file://$PROJECT_DIR$/dtssdk/server/core/device_online.go" />
+    <entry file="file://$PROJECT_DIR$/../AtianSDK/src/model/message.proto" />
+    <entry file="file://$PROJECT_DIR$/dtssdk/model/history/operation_log.go" />
+    <entry file="file://$PROJECT_DIR$/dtssdk/dll/windows.go" />
+    <entry file="file://$PROJECT_DIR$/src/model/proto/message.pb.go" />
+    <entry file="file://C:/Go/src/encoding/json/decode.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="174">
+          <caret line="94" column="5" selection-start-line="94" selection-start-column="5" selection-end-line="94" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/Go/src/sync/map.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="152">
+          <caret line="332" selection-start-line="332" selection-end-line="332" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/model/proto/proto.go" />
+    <entry file="file://$PROJECT_DIR$/dtssdk/model/history/alarm_log.go" />
+    <entry file="file://$PROJECT_DIR$/dtssdk/server/core/defence_zone.go" />
+    <entry file="file://$PROJECT_DIR$/dtssdk/server/database/ccsql.go" />
+    <entry file="file://$PROJECT_DIR$/bin/service.ini" />
+    <entry file="file://$PROJECT_DIR$/dtssdk/server/web/user_ctl.go" />
+    <entry file="file://C:/Go/src/sync/mutex.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="154">
+          <caret line="175" selection-start-line="175" selection-end-line="175" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/Go/src/reflect/value.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="127">
+          <caret line="446" selection-start-line="446" selection-end-line="446" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dtssdk/server/web/df_zone_ctl.go" />
+    <entry file="file://C:/Go/src/sync/once.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="166">
+          <caret line="36" selection-start-line="36" selection-end-line="36" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../GoModule/pkg/mod/github.com/go-pg/pg@v8.0.4+incompatible/orm/query.go" />
+    <entry file="file://$PROJECT_DIR$/../GoModule/pkg/mod/github.com/eclipse/paho.mqtt.golang@v1.2.0/options.go" />
+    <entry file="file://$PROJECT_DIR$/dtssdk/data/datacentre.go" />
+    <entry file="file://$PROJECT_DIR$/dtssdk/handle/sdk_handle.go" />
+    <entry file="file://$PROJECT_DIR$/dtssdk/model/zone/defence_zone.go" />
+    <entry file="file://$PROJECT_DIR$/dtssdk/server/web/channel_ctl.go" />
+    <entry file="file://$PROJECT_DIR$/dtssdk/server/web/system_ctl.go" />
+    <entry file="file://$PROJECT_DIR$/dtssdk/model/sdk/client.go" />
+    <entry file="file://$PROJECT_DIR$/dtssdk/model/sdk_model/model.go" />
+    <entry file="file://$PROJECT_DIR$/dtssdk/server/core/sdk.go" />
+    <entry file="file://$PROJECT_DIR$/dtssdk/server/mq_server/mq_server.go" />
+    <entry file="file://$PROJECT_DIR$/dtssdk/tools/strcode.go" />
+    <entry file="file://$PROJECT_DIR$/icon/icon.png" />
+    <entry file="file://$PROJECT_DIR$/icon/iconunix.go" />
+    <entry file="file://C:/Go/src/net/net.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="182">
+          <caret line="184" column="15" selection-start-line="184" selection-start-column="15" selection-end-line="184" selection-end-column="15" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/Go/pkg/mod/github.com/golang/protobuf@v1.3.1/proto/decode.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1017">
+          <caret line="333" column="5" selection-start-line="333" selection-start-column="5" selection-end-line="333" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/Go/src/runtime/asm_amd64.s">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="140">
+          <caret line="1337" selection-start-line="1337" selection-end-line="1337" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/Go/src/runtime/panic.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="128">
+          <caret line="689" selection-start-line="689" selection-end-line="689" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/build.bat" />
+    <entry file="file://$PROJECT_DIR$/go.mod">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="209">
+          <caret line="11" column="73" selection-start-line="11" selection-start-column="73" selection-end-line="11" selection-end-column="73" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dtssdk/client.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="950">
+          <caret line="61" column="23" selection-start-line="61" selection-start-column="9" selection-end-line="61" selection-end-column="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dtssdk/handle.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1919">
+          <caret line="106" selection-start-line="106" selection-end-line="106" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dtssdk/model/message.pb.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="8531">
+          <caret line="453" column="101" selection-start-line="453" selection-start-column="4" selection-end-line="453" selection-end-column="101" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dtssdk/codec/sdk_codec.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="152">
+          <caret line="12" column="22" selection-start-line="12" selection-start-column="22" selection-end-line="12" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dtssdk/model/message.proto">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="266">
+          <caret line="14" column="20" selection-start-line="14" selection-start-column="4" selection-end-line="14" selection-end-column="20" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dtssdk/utils/conv.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1216">
+          <caret line="68" column="15" selection-start-line="68" selection-start-column="5" selection-end-line="68" selection-end-column="15" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/main.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="172">
+          <caret line="40" column="87" selection-start-line="40" selection-start-column="87" selection-end-line="40" selection-end-column="87" />
+        </state>
+      </provider>
+    </entry>
+  </component>
+</project>

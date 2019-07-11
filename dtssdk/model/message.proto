@@ -1,0 +1,139 @@
+syntax = "proto3";
+
+//protoc --go_out=. dtssdk/model/message.proto
+
+package model;
+
+
+enum MsgID{
+    ConnectID=0;
+    DisconnectID=1;
+    GetDefenceZoneRequestID=2;
+    GetDefenceZoneReplyID=3;
+    SetDeviceRequestID=4;
+    SetDeviceReplyID=5;
+    ZoneTempNotifyID=6;
+    ZoneAlarmNotifyID=7;
+    DeviceEventNotifyID=8;
+    TempSignalNotifyID=9;
+
+    HeartBeatID=250;
+}
+
+
+//布防状态
+enum DeploymentState{
+    Deployment =0;//布防
+    Withdrawal =1;//撤防
+}
+
+//防区状态
+enum DefenceAreaState{
+    Normal=0;//正常
+    AlarmUp=1;//警报
+    AlarmTemp=2;//故障
+    AlarmDiffer=3;//温差
+}
+
+//防区状态
+enum FiberState{
+    SSTATEISOK=0;//光纤正常
+    SSTATUSUNFIN=1;//光纤拔出
+    SSTATUSFIN=2;//光纤插入
+    SSTATUSBRK=3;//光纤断裂
+    SSTATUSTLO=4;//光纤过长
+    SSTATUSLTM=5;//光纤损耗过多
+}
+
+//设备
+message DeviceEvent{
+    int32 ChannelID=1;
+    string DeviceID=2;
+    int64 Timestamp=3;
+    string Line=4;
+    FiberState EventType=5;
+    float ChannelLength=6;
+}
+
+//防区
+message DefenceZone{
+    int32 ID=1;
+    string ZoneName=2;
+    float Start=3;
+    float Finish=4;
+    string WarehouseType=5;
+    string W=6;
+    string X=7;
+    string Y=8;
+    string Z=9;
+    DefenceAreaState AlarmType=10;
+    float MaxTemperature=11;
+    float MinTemperature=12;
+    float AverageTemperature=13;
+}
+
+//设置设备请求
+message SetDeviceRequest{
+   bool ZoneTempNotifyEnable =1;
+   bool	ZoneAlarmNotifyEnable =2;
+   bool	FiberStatusNotifyEnable =3;
+   bool	TempSignalNotifyEnable =4;
+}
+
+//设置设备回执
+message SetDeviceReply{
+   bool Success=1;
+   string ErrMsg=2;
+}
+
+//获取所有防区
+message GetDefenceZoneRequest{
+    int32 Channel=1;
+    string Search=2;
+}
+
+//获取所有防区
+message GetDefenceZoneReply{
+  bool Success=1;
+  string ErrMsg=2;
+  repeated DefenceZone Rows=3;
+}
+
+
+//防区温度，广播
+message ZoneTempNotify{
+  string DeviceID=1;
+  int64 Timestamp=2;
+  repeated DefenceZone Zones=3;
+}
+
+//防区警报 广播
+message ZoneAlarmNotify{
+  string DeviceID=1;
+  int64 Timestamp=2;
+  repeated DefenceZone Zones=3;
+}
+
+//设备状态， 广播
+message DeviceEventNotify{
+   int32 ChannelID=1;
+   string DeviceID=2;
+   int64 Timestamp=3;
+   string Line=4;
+   FiberState EventType=5;
+   float ChannelLength=6;
+}
+
+//设备状态， 广播
+message TempSignalNotify{
+  string DeviceID=1;
+  string Line=2;
+  int32 ChannelID=3;
+  repeated float Signal=4;
+  int64 Timestamp=5;
+}
+
+//心跳
+message HeartBeat{
+
+}
