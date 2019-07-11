@@ -1,9 +1,9 @@
 package main
 
 import (
-	"DTSSDK_Golang/dtssdk"
-	"DTSSDK_Golang/dtssdk/model"
 	"fmt"
+	"github.com/Atian-OE/DTSSDK_Golang/dtssdk"
+	"github.com/Atian-OE/DTSSDK_Golang/dtssdk/model"
 	"os"
 	"os/signal"
 	"syscall"

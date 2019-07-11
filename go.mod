@@ -1,6 +1,4 @@
-module DTSSDK_Golang
-
-go 1.12
+module github.com/Atian-OE/DTSSDK_Golang
 
 require (
 	github.com/golang/protobuf v1.3.2

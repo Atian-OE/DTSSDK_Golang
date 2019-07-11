@@ -1,12 +1,12 @@
 package dtssdk
 
 import (
-	"DTSSDK_Golang/dtssdk/codec"
-	"DTSSDK_Golang/dtssdk/model"
-	"DTSSDK_Golang/dtssdk/utils"
 	"bytes"
 	"container/list"
 	"fmt"
+	"github.com/Atian-OE/DTSSDK_Golang/dtssdk/codec"
+	"github.com/Atian-OE/DTSSDK_Golang/dtssdk/model"
+	"github.com/Atian-OE/DTSSDK_Golang/dtssdk/utils"
 	"github.com/kataras/iris/core/errors"
 	"net"
 	"sync"

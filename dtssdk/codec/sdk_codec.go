@@ -1,8 +1,8 @@
 package codec
 
 import (
-	"DTSSDK_Golang/dtssdk/model"
-	"DTSSDK_Golang/dtssdk/utils"
+	"github.com/Atian-OE/DTSSDK_Golang/dtssdk/model"
+	"github.com/Atian-OE/DTSSDK_Golang/dtssdk/utils"
 	"github.com/golang/protobuf/proto"
 )
 
