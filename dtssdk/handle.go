@@ -128,14 +128,14 @@ func (self*DTSSDKClient)CallDisconnected(call func(string))  {
 //回调分区温度更新的通知
 func (self*DTSSDKClient)CallZoneTempNotify(call func(*model.ZoneTempNotify,error)) (*model.SetDeviceReply, error) {
 	self._ZoneTempNotifyEnable =true
+	self._ZoneTempNotify =call
+
 	if(call==nil){
 		return nil, errors.New("callback func is nil")
 	}
 	if(!self.connected){
 		return nil, errors.New("client not connected")
 	}
-	self._ZoneTempNotify =call
-
 
 	return self.SetDeviceRequest()
 }
@@ -152,14 +152,13 @@ func (self*DTSSDKClient)DisableZoneTempNotify() (*model.SetDeviceReply, error) {
 //回调分区警报更新的通知
 func (self*DTSSDKClient)CallZoneAlarmNotify(call func(*model.ZoneAlarmNotify,error)) (*model.SetDeviceReply, error) {
 	self._ZoneAlarmNotifyEnable =true
+	self._ZoneAlarmNotify =call
 	if(call==nil){
 		return nil, errors.New("callback func is nil")
 	}
 	if(!self.connected){
 		return nil, errors.New("client not connected")
 	}
-	self._ZoneAlarmNotify =call
-
 
 	return self.SetDeviceRequest()
 }
@@ -176,14 +175,14 @@ func (self*DTSSDKClient)DisableZoneAlarmNotify() (*model.SetDeviceReply, error) 
 //回调光纤状态更新的通知
 func (self*DTSSDKClient)CallDeviceEventNotify(call func(*model.DeviceEventNotify,error)) (*model.SetDeviceReply, error) {
 	self._FiberStatusNotifyEnable =true
+	self._FiberStatusNotify =call
+
 	if(call==nil){
 		return nil, errors.New("callback func is nil")
 	}
 	if(!self.connected){
 		return nil, errors.New("client not connected")
 	}
-	self._FiberStatusNotify =call
-
 
 	return self.SetDeviceRequest()
 }
@@ -200,14 +199,15 @@ func (self*DTSSDKClient)DisableDeviceEventNotify() (*model.SetDeviceReply, error
 //回调温度信号更新的通知
 func (self*DTSSDKClient)CallTempSignalNotify(call func(*model.TempSignalNotify,error)) (*model.SetDeviceReply, error) {
 	self._TempSignalNotifyEnable =true
+	self._TempSignalNotify =call
+
 	if(call==nil){
 		return nil, errors.New("callback func is nil")
 	}
 	if(!self.connected){
 		return nil, errors.New("client not connected")
 	}
-	self._TempSignalNotify =call
-
+	
 
 	return self.SetDeviceRequest()
 }
