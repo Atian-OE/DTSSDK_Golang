@@ -21,18 +21,16 @@ enum MsgID{
 }
 
 
-//布防状态
-enum DeploymentState{
-    Deployment =0;//布防
-    Withdrawal =1;//撤防
-}
 
 //防区状态
 enum DefenceAreaState{
     Normal=0;//正常
-    AlarmUp=1;//警报
-    AlarmTemp=2;//故障
-    AlarmDiffer=3;//温差
+    WarnDiffer=1;//温差预警
+    WarnUp=2;//温升预警
+    WarnTemp=3;//定温预警
+    AlarmDiffer=4;//温差警报
+    AlarmUp=5;//温升警报
+    AlarmTemp=6;//定温警报
 }
 
 //防区状态
@@ -61,15 +59,11 @@ message DefenceZone{
     string ZoneName=2;
     float Start=3;
     float Finish=4;
-    string WarehouseType=5;
-    string W=6;
-    string X=7;
-    string Y=8;
-    string Z=9;
-    DefenceAreaState AlarmType=10;
-    float MaxTemperature=11;
-    float MinTemperature=12;
-    float AverageTemperature=13;
+    string Tag=5;
+    DefenceAreaState AlarmType=6;
+    float MaxTemperature=7;
+    float MinTemperature=8;
+    float AverageTemperature=9;
 }
 
 //设置设备请求

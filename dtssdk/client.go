@@ -63,8 +63,11 @@ func(self *DTSSDKClient)init(addr string)  {
 
 
 	self.wait_pack_timeout_ticker= time.NewTicker(time.Millisecond*500)
+	self.wait_pack_timeout_over=make(chan interface{})
 	self.heart_beat_ticker= time.NewTicker(time.Second*5)
+	self.heart_beat_ticker_over=make(chan interface{})
 	self.reconnect_ticker=time.NewTicker(time.Second*10)
+	self.reconnect_ticker_over=make(chan interface{})
 
 	go self.wait_pack_timeout()
 	go self.heart_beat()
@@ -84,7 +87,7 @@ func (self *DTSSDKClient)connect()  {
 	}
 	conn, err := net.DialTCP("tcp", nil, tcpaddr)
 	if(err!=nil){
-		fmt.Println("连接服务器失败!")
+		//fmt.Println("连接服务器失败!")
 		return
 	}
 	self.sess=conn

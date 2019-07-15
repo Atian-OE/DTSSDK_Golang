@@ -207,7 +207,7 @@ func (self*DTSSDKClient)CallTempSignalNotify(call func(*model.TempSignalNotify,e
 	if(!self.connected){
 		return nil, errors.New("client not connected")
 	}
-	
+
 
 	return self.SetDeviceRequest()
 }
