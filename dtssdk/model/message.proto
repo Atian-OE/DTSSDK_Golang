@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-//protoc --go_out=. src/sdk/message.proto
+//protoc --go_out=. dtssdk/model/message.proto
 
 package model;
 
@@ -102,7 +102,9 @@ message GetDeviceIDRequest{
 
 //获取设备id 回执
 message GetDeviceIDReply{
-  string DeviceID=1;
+  bool Success=1;
+  string ErrMsg=2;
+  string DeviceID=3;
 }
 
 
