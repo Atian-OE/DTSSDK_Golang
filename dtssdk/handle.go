@@ -14,7 +14,7 @@ func (self*DTSSDKClient)tcp_handle(msg_id model.MsgID, data []byte,conn net.Conn
 		v:=value.(*WaitPackStr)
 		if(v.Key==msg_id){
 			go (*v.Call)(msg_id,data[5:],conn,nil)
-			self.wait_pack_list.Delete(v)
+			self.wait_pack_list.Delete(key)
 			is_handled=true
 			return false
 		}
@@ -32,7 +32,7 @@ func (self*DTSSDKClient)tcp_handle(msg_id model.MsgID, data []byte,conn net.Conn
 		self.connected=true
 		go self.SetDeviceRequest()
 		if(self._connected_action!=nil){
-			self._connected_action(self.addr)
+			go self._connected_action(self.addr)
 		}
 
 	case model.MsgID_DisconnectID:
@@ -41,12 +41,12 @@ func (self*DTSSDKClient)tcp_handle(msg_id model.MsgID, data []byte,conn net.Conn
 		self.wait_pack_list.Range(func(key,value interface{}) bool {
 			v:=value.(*WaitPackStr)
 			go (*v.Call)(0,nil,nil,errors.New("client disconnect"))
-			self.wait_pack_list.Delete(v)
+			self.wait_pack_list.Delete(key)
 			return true
 		})
 
 		if(self._disconnected_action!=nil){
-			self._disconnected_action(self.addr)
+			go self._disconnected_action(self.addr)
 		}
 
 	case model.MsgID_ZoneTempNotifyID:
@@ -97,7 +97,6 @@ func (self*DTSSDKClient)SetDeviceRequest() (*model.SetDeviceReply,error) {
 		return nil,err
 	}
 
-	//time.After(time.Second*3)
 	type ReplyStruct struct {
 		rep *model.SetDeviceReply
 		err error

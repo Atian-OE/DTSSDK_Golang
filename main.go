@@ -40,26 +40,26 @@ func main()  {
 	rep,err:= client.CallZoneTempNotify(func(notify *model.ZoneTempNotify, e error) {
 		fmt.Println("CallZoneTempNotify"+notify.DeviceID)
 	})
-	fmt.Println(err)
+	fmt.Println("CallZoneTempNotify",err)
 	fmt.Println(rep)
 
 
 	rep,err= client.CallTempSignalNotify(func(notify *model.TempSignalNotify, e error) {
 		fmt.Println("CallTempSignalNotify"+notify.DeviceID)
 	})
-	fmt.Println(err)
+	fmt.Println("CallTempSignalNotify",err)
 	fmt.Println(rep)
 
 	rep,err= client.CallDeviceEventNotify(func(notify *model.DeviceEventNotify, e error) {
 		fmt.Println("CallDeviceEventNotify"+notify.DeviceID)
 	})
-	fmt.Println(err)
+	fmt.Println("CallDeviceEventNotify",err)
 	fmt.Println(rep)
 
 	rep,err= client.CallZoneAlarmNotify(func(notify *model.ZoneAlarmNotify, e error) {
 		fmt.Println("CallZoneAlarmNotify"+notify.DeviceID)
 	})
-	fmt.Println(err)
+	fmt.Println("CallZoneAlarmNotify",err)
 	fmt.Println(rep)
 
 

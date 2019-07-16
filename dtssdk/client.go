@@ -210,7 +210,7 @@ func (self *DTSSDKClient)unpack(cache *bytes.Buffer,conn net.Conn) bool {
 
 //这个包会由这个回调接受
 func (self*DTSSDKClient) wait_pack(msg_id model.MsgID,call *func(model.MsgID, []byte, net.Conn,error))  {
-	self.wait_pack_list.Store(call,&WaitPackStr{Key:msg_id,Timeout:3000,Call:call})
+	self.wait_pack_list.Store(call,&WaitPackStr{Key:msg_id,Timeout:10000,Call:call})
 }
 
 //删除这个回调
