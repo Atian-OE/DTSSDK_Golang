@@ -5,6 +5,7 @@ import (
 	"github.com/Atian-OE/DTSSDK_Golang/dtssdk/model"
 	"github.com/golang/protobuf/proto"
 	"net"
+	"time"
 )
 
 func (self*DTSSDKClient)tcp_handle(msg_id model.MsgID, data []byte,conn net.Conn)  {
@@ -97,6 +98,7 @@ func (self*DTSSDKClient)SetDeviceRequest() (*model.SetDeviceReply,error) {
 	}
 
 	wait:=make(chan ReplyStruct)
+	timeout:=time.After(time.Second*3)
 
 	call:= func(msg_id model.MsgID,data []byte,conn net.Conn,err error) {
 		if(err!=nil){
@@ -109,8 +111,16 @@ func (self*DTSSDKClient)SetDeviceRequest() (*model.SetDeviceReply,error) {
 		wait<-ReplyStruct{&reply,err}
 	}
 	self.WaitPack(model.MsgID_SetDeviceReplyID, &call)
-	reply:=<-wait
 
+	var reply ReplyStruct
+	select {
+	case <-timeout:
+		err=errors.New("request timeout")
+	case reply=<-wait:
+	}
+	if(err!=nil){
+		return nil,err
+	}
 
 	return reply.rep,reply.err
 }
@@ -238,7 +248,7 @@ func (self*DTSSDKClient)GetDefenceZone(ch_id int,search string) (*model.GetDefen
 	}
 
 	wait:=make(chan ReplyStruct)
-	//wait:=make(chan model.GetDefenceZoneReply)
+	timeout:=time.After(time.Second*3)
 
 	call:= func(msg_id model.MsgID,data []byte,conn net.Conn,err error) {
 		if(err!=nil){
@@ -251,7 +261,60 @@ func (self*DTSSDKClient)GetDefenceZone(ch_id int,search string) (*model.GetDefen
 	}
 
 	self.WaitPack(model.MsgID_GetDefenceZoneReplyID, &call)
-	reply:=<-wait
+
+	var reply ReplyStruct
+	select {
+	case <-timeout:
+		err=errors.New("request timeout")
+	case reply=<-wait:
+	}
+	if(err!=nil){
+		return nil,err
+	}
+
+	return reply.rep,reply.err
+}
+
+
+//获得防区
+func (self*DTSSDKClient)GetDeviceID() (*model.GetDeviceIDReply,error) {
+	req:=&model.GetDeviceIDRequest{}
+
+	err:=self.Send(req)
+	if(err!=nil){
+		return nil,err
+	}
+
+	type ReplyStruct struct {
+		rep *model.GetDeviceIDReply
+		err error
+	}
+
+	wait:=make(chan ReplyStruct)
+	timeout:=time.After(time.Second*3)
+
+	call:= func(msg_id model.MsgID,data []byte,conn net.Conn,err error) {
+		if(err!=nil){
+			wait<-ReplyStruct{nil,err}
+			return
+		}
+		reply:=model.GetDeviceIDReply{}
+		err=proto.Unmarshal(data, &reply)
+		wait<-ReplyStruct{&reply,err}
+	}
+
+	self.WaitPack(model.MsgID_GetDeviceIDReplyID, &call)
+
+	var reply ReplyStruct
+	select {
+	case <-timeout:
+		err=errors.New("request timeout")
+	case reply=<-wait:
+	}
+
+	if(err!=nil){
+		return nil,err
+	}
 
 	return reply.rep,reply.err
 }

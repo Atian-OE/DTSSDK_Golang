@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-//protoc --go_out=. dtssdk/model/message.proto
+//protoc --go_out=. src/sdk/message.proto
 
 package model;
 
@@ -16,6 +16,8 @@ enum MsgID{
     ZoneAlarmNotifyID=7;
     DeviceEventNotifyID=8;
     TempSignalNotifyID=9;
+    GetDeviceIDRequestID=10;
+    GetDeviceIDReplyID=11;
 
     HeartBeatID=250;
 }
@@ -91,6 +93,16 @@ message GetDefenceZoneReply{
   bool Success=1;
   string ErrMsg=2;
   repeated DefenceZone Rows=3;
+}
+
+//获取设备id 请求
+message GetDeviceIDRequest{
+
+}
+
+//获取设备id 回执
+message GetDeviceIDReply{
+  string DeviceID=1;
 }
 
 

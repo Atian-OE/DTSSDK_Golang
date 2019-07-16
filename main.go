@@ -28,9 +28,13 @@ func main()  {
 	})
 	time.Sleep(time.Second*2)
 
-	rep1,err:= client.GetDefenceZone(1,"")
+	rep1,err:= client.GetDeviceID()
 	fmt.Println(err)
 	fmt.Println(rep1)
+
+	rep2,err:= client.GetDefenceZone(1,"")
+	fmt.Println(err)
+	fmt.Println(rep2)
 
 
 	rep,err:= client.CallZoneTempNotify(func(notify *model.ZoneTempNotify, e error) {
