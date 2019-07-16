@@ -2,7 +2,6 @@ package dtssdk
 
 import (
 	"bytes"
-	"container/list"
 	"fmt"
 	"github.com/Atian-OE/DTSSDK_Golang/dtssdk/codec"
 	"github.com/Atian-OE/DTSSDK_Golang/dtssdk/model"
@@ -24,8 +23,7 @@ type WaitPackStr struct {
 type DTSSDKClient struct{
 	sess *net.TCPConn
 	connected bool
-	wait_pack_list_mu sync.Mutex
-	wait_pack_list *list.List//等待这个包回传
+	wait_pack_list *sync.Map//等待这个包回传
 	wait_pack_timeout_ticker *time.Ticker//等待回传的回调 会在 3秒后 自动删除
 	wait_pack_timeout_over chan interface{} //关闭自动删除
 	heart_beat_ticker *time.Ticker//心跳包的发送
@@ -59,7 +57,7 @@ func NewDTSClient(addr string) *DTSSDKClient {
 
 func(self *DTSSDKClient)init(addr string)  {
 	self.addr=addr
-	self.wait_pack_list=list.New()
+	self.wait_pack_list=new(sync.Map)
 
 
 	self.wait_pack_timeout_ticker= time.NewTicker(time.Millisecond*500)
@@ -135,15 +133,18 @@ func (self *DTSSDKClient) wait_pack_timeout()  {
 	for{
 		select {
 		case <-self.wait_pack_timeout_ticker.C:
-			for l:=self.wait_pack_list.Front();l!=nil;l=l.Next(){
-				v:=l.Value.(WaitPackStr)
+			self.wait_pack_list.Range(func(key ,value interface{}) bool{
+
+				v:=value.(*WaitPackStr)
 				v.Timeout-=500
-				//fmt.Println(v.Key.String(),msg_type.String())
 				if(v.Timeout<=0){
 					go (*v.Call)(0,nil,nil,errors.New("callback timeout"))
-					self.wait_pack_list.Remove(l)
+					self.wait_pack_list.Delete(key)
 				}
-			}
+				return true
+			})
+
+
 		case <-self.wait_pack_timeout_over:
 			return
 
@@ -156,7 +157,7 @@ func (self *DTSSDKClient)client_handle(conn net.Conn)  {
 	defer func() {
 		if(conn!=nil){
 			self.tcp_handle(model.MsgID_DisconnectID,nil,conn)
-			conn.Close();
+			conn.Close()
 		}
 	}()
 
@@ -194,7 +195,7 @@ func (self *DTSSDKClient)unpack(cache *bytes.Buffer,conn net.Conn) bool {
 	if(pkg_size > len(buf)-5){
 		return true
 	}
-	//fmt.Println(pkg_size,buf[:4])
+
 	cmd:=buf[4]
 	self.tcp_handle(model.MsgID(cmd),buf[:pkg_size+5],conn)
 	cache.Reset()
@@ -208,24 +209,21 @@ func (self *DTSSDKClient)unpack(cache *bytes.Buffer,conn net.Conn) bool {
 
 
 //这个包会由这个回调接受
-func (self*DTSSDKClient)WaitPack(msg_id model.MsgID,call *func(model.MsgID, []byte, net.Conn,error))  {
-	self.wait_pack_list_mu.Lock()
-	defer self.wait_pack_list_mu.Unlock()
-	self.wait_pack_list.PushBack(WaitPackStr{Key:msg_id,Timeout:3000,Call:call})
+func (self*DTSSDKClient) wait_pack(msg_id model.MsgID,call *func(model.MsgID, []byte, net.Conn,error))  {
+	self.wait_pack_list.Store(call,&WaitPackStr{Key:msg_id,Timeout:3000,Call:call})
 }
 
 //删除这个回调
-func (self*DTSSDKClient)DeleteWaitPackFunc(call *func(model.MsgID, []byte, net.Conn,error)) ()  {
-	self.wait_pack_list_mu.Lock()
-	defer self.wait_pack_list_mu.Unlock()
+func (self*DTSSDKClient) delete_wait_pack_func(call *func(model.MsgID, []byte, net.Conn,error)) ()  {
 
-	for l:=self.wait_pack_list.Front();l!=nil;l=l.Next(){
-		v:=l.Value.(WaitPackStr)
-		if(v.Call==call){
-			self.wait_pack_list.Remove(l)
-			return
-		}
+	value,ok:=self.wait_pack_list.Load(call)
+	if(ok){
+		v:=value.(*WaitPackStr)
+		go (*v.Call)(0,nil,nil,errors.New("cancel callback"))
+		self.wait_pack_list.Delete(call)
 	}
+
+
 }
 
 //发送消息

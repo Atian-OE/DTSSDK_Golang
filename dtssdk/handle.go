@@ -5,22 +5,27 @@ import (
 	"github.com/Atian-OE/DTSSDK_Golang/dtssdk/model"
 	"github.com/golang/protobuf/proto"
 	"net"
-	"time"
 )
 
 func (self*DTSSDKClient)tcp_handle(msg_id model.MsgID, data []byte,conn net.Conn)  {
 
-	self.wait_pack_list_mu.Lock()
-	defer self.wait_pack_list_mu.Unlock()
-	for l:=self.wait_pack_list.Front();l!=nil;l=l.Next(){
-		v:=l.Value.(WaitPackStr)
-		//fmt.Println(v.Key.String(),msg_type.String())
+	var is_handled bool
+	self.wait_pack_list.Range(func(key,value interface{}) bool {
+		v:=value.(*WaitPackStr)
 		if(v.Key==msg_id){
 			go (*v.Call)(msg_id,data[5:],conn,nil)
-			self.wait_pack_list.Remove(l)
-			return
+			self.wait_pack_list.Delete(v)
+			is_handled=true
+			return false
 		}
+		return true
+	})
+
+	if(is_handled){
+		return
 	}
+
+
 
 	switch (msg_id) {
 	case model.MsgID_ConnectID:
@@ -33,11 +38,12 @@ func (self*DTSSDKClient)tcp_handle(msg_id model.MsgID, data []byte,conn net.Conn
 	case model.MsgID_DisconnectID:
 		self.connected=false
 
-		for l:=self.wait_pack_list.Front();l!=nil;l=l.Next(){
-			v:=l.Value.(WaitPackStr)
-				go (*v.Call)(0,nil,nil,errors.New("client disconnect"))
-				self.wait_pack_list.Remove(l)
-		}
+		self.wait_pack_list.Range(func(key,value interface{}) bool {
+			v:=value.(*WaitPackStr)
+			go (*v.Call)(0,nil,nil,errors.New("client disconnect"))
+			self.wait_pack_list.Delete(v)
+			return true
+		})
 
 		if(self._disconnected_action!=nil){
 			self._disconnected_action(self.addr)
@@ -98,7 +104,6 @@ func (self*DTSSDKClient)SetDeviceRequest() (*model.SetDeviceReply,error) {
 	}
 
 	wait:=make(chan ReplyStruct)
-	timeout:=time.After(time.Second*3)
 
 	call:= func(msg_id model.MsgID,data []byte,conn net.Conn,err error) {
 		if(err!=nil){
@@ -110,17 +115,9 @@ func (self*DTSSDKClient)SetDeviceRequest() (*model.SetDeviceReply,error) {
 
 		wait<-ReplyStruct{&reply,err}
 	}
-	self.WaitPack(model.MsgID_SetDeviceReplyID, &call)
+	self.wait_pack(model.MsgID_SetDeviceReplyID, &call)
 
-	var reply ReplyStruct
-	select {
-	case <-timeout:
-		err=errors.New("request timeout")
-	case reply=<-wait:
-	}
-	if(err!=nil){
-		return nil,err
-	}
+    reply:=<-wait
 
 	return reply.rep,reply.err
 }
@@ -248,7 +245,7 @@ func (self*DTSSDKClient)GetDefenceZone(ch_id int,search string) (*model.GetDefen
 	}
 
 	wait:=make(chan ReplyStruct)
-	timeout:=time.After(time.Second*3)
+
 
 	call:= func(msg_id model.MsgID,data []byte,conn net.Conn,err error) {
 		if(err!=nil){
@@ -260,17 +257,9 @@ func (self*DTSSDKClient)GetDefenceZone(ch_id int,search string) (*model.GetDefen
 		wait<-ReplyStruct{&reply,err}
 	}
 
-	self.WaitPack(model.MsgID_GetDefenceZoneReplyID, &call)
+	self.wait_pack(model.MsgID_GetDefenceZoneReplyID, &call)
 
-	var reply ReplyStruct
-	select {
-	case <-timeout:
-		err=errors.New("request timeout")
-	case reply=<-wait:
-	}
-	if(err!=nil){
-		return nil,err
-	}
+	reply:=<-wait
 
 	return reply.rep,reply.err
 }
@@ -291,7 +280,6 @@ func (self*DTSSDKClient)GetDeviceID() (*model.GetDeviceIDReply,error) {
 	}
 
 	wait:=make(chan ReplyStruct)
-	timeout:=time.After(time.Second*3)
 
 	call:= func(msg_id model.MsgID,data []byte,conn net.Conn,err error) {
 		if(err!=nil){
@@ -303,14 +291,10 @@ func (self*DTSSDKClient)GetDeviceID() (*model.GetDeviceIDReply,error) {
 		wait<-ReplyStruct{&reply,err}
 	}
 
-	self.WaitPack(model.MsgID_GetDeviceIDReplyID, &call)
+	self.wait_pack(model.MsgID_GetDeviceIDReplyID, &call)
 
-	var reply ReplyStruct
-	select {
-	case <-timeout:
-		err=errors.New("request timeout")
-	case reply=<-wait:
-	}
+	 reply:=<-wait
+
 
 	if(err!=nil){
 		return nil,err
