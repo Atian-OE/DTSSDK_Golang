@@ -132,98 +132,153 @@ func (self*DTSSDKClient)CallDisconnected(call func(string))  {
 }
 
 //回调分区温度更新的通知
-func (self*DTSSDKClient)CallZoneTempNotify(call func(*model.ZoneTempNotify,error)) (*model.SetDeviceReply, error) {
+func (self*DTSSDKClient)CallZoneTempNotify(call func(*model.ZoneTempNotify,error)) error {
 	self._ZoneTempNotifyEnable =true
 	self._ZoneTempNotify =call
 
 	if(call==nil){
-		return nil, errors.New("callback func is nil")
+		return errors.New("callback func is nil")
 	}
 	if(!self.connected){
-		return nil, errors.New("client not connected")
+		return errors.New("client not connected")
 	}
 
-	return self.SetDeviceRequest()
+	reply,err:=self.SetDeviceRequest()
+	if(err!=nil){
+		return err
+	}
+	if(!reply.Success){
+		return errors.New(reply.ErrMsg)
+	}
+	return nil
 }
 
 //禁用回调分区温度更新的通知
-func (self*DTSSDKClient)DisableZoneTempNotify() (*model.SetDeviceReply, error) {
+func (self*DTSSDKClient)DisableZoneTempNotify() error {
 	self._ZoneTempNotifyEnable =false
 	self._ZoneTempNotify =nil
 
-	return self.SetDeviceRequest()
+	reply,err:=self.SetDeviceRequest()
+	if(err!=nil){
+		return err
+	}
+	if(!reply.Success){
+		return errors.New(reply.ErrMsg)
+	}
+	return nil
 }
 
 
 //回调分区警报更新的通知
-func (self*DTSSDKClient)CallZoneAlarmNotify(call func(*model.ZoneAlarmNotify,error)) (*model.SetDeviceReply, error) {
+func (self*DTSSDKClient)CallZoneAlarmNotify(call func(*model.ZoneAlarmNotify,error)) error {
 	self._ZoneAlarmNotifyEnable =true
 	self._ZoneAlarmNotify =call
 	if(call==nil){
-		return nil, errors.New("callback func is nil")
+		return errors.New("callback func is nil")
 	}
 	if(!self.connected){
-		return nil, errors.New("client not connected")
+		return errors.New("client not connected")
 	}
 
-	return self.SetDeviceRequest()
+	reply,err:=self.SetDeviceRequest()
+	if(err!=nil){
+		return err
+	}
+	if(!reply.Success){
+		return errors.New(reply.ErrMsg)
+	}
+	return nil
 }
 
 //禁用回调分区警报更新的通知
-func (self*DTSSDKClient)DisableZoneAlarmNotify() (*model.SetDeviceReply, error) {
+func (self*DTSSDKClient)DisableZoneAlarmNotify()  error {
 	self._ZoneAlarmNotifyEnable =false
 	self._ZoneAlarmNotify =nil
 
-	return self.SetDeviceRequest()
+	reply,err:=self.SetDeviceRequest()
+	if(err!=nil){
+		return err
+	}
+	if(!reply.Success){
+		return errors.New(reply.ErrMsg)
+	}
+	return nil
 }
 
 
 //回调光纤状态更新的通知
-func (self*DTSSDKClient)CallDeviceEventNotify(call func(*model.DeviceEventNotify,error)) (*model.SetDeviceReply, error) {
+func (self*DTSSDKClient)CallDeviceEventNotify(call func(*model.DeviceEventNotify,error)) error {
 	self._FiberStatusNotifyEnable =true
 	self._FiberStatusNotify =call
 
 	if(call==nil){
-		return nil, errors.New("callback func is nil")
+		return errors.New("callback func is nil")
 	}
 	if(!self.connected){
-		return nil, errors.New("client not connected")
+		return errors.New("client not connected")
 	}
 
-	return self.SetDeviceRequest()
+	reply,err:=self.SetDeviceRequest()
+	if(err!=nil){
+		return err
+	}
+	if(!reply.Success){
+		return errors.New(reply.ErrMsg)
+	}
+	return nil
 }
 
 //禁用回调光纤状态更新的通知
-func (self*DTSSDKClient)DisableDeviceEventNotify() (*model.SetDeviceReply, error) {
+func (self*DTSSDKClient)DisableDeviceEventNotify() error {
 	self._FiberStatusNotifyEnable =false
 	self._FiberStatusNotify =nil
-
-	return self.SetDeviceRequest()
+	reply,err:=self.SetDeviceRequest()
+	if(err!=nil){
+		return err
+	}
+	if(!reply.Success){
+		return errors.New(reply.ErrMsg)
+	}
+	return nil
 }
 
 
 //回调温度信号更新的通知
-func (self*DTSSDKClient)CallTempSignalNotify(call func(*model.TempSignalNotify,error)) (*model.SetDeviceReply, error) {
+func (self*DTSSDKClient)CallTempSignalNotify(call func(*model.TempSignalNotify,error)) error {
 	self._TempSignalNotifyEnable =true
 	self._TempSignalNotify =call
 
 	if(call==nil){
-		return nil, errors.New("callback func is nil")
+		return errors.New("callback func is nil")
 	}
 	if(!self.connected){
-		return nil, errors.New("client not connected")
+		return errors.New("client not connected")
 	}
 
 
-	return self.SetDeviceRequest()
+	reply,err:=self.SetDeviceRequest()
+	if(err!=nil){
+		return err
+	}
+	if(!reply.Success){
+		return errors.New(reply.ErrMsg)
+	}
+	return nil
 }
 
 //禁用回调温度信号更新的通知
-func (self*DTSSDKClient)DisableTempSignalNotify() (*model.SetDeviceReply, error) {
+func (self*DTSSDKClient)DisableTempSignalNotify() error {
 	self._TempSignalNotifyEnable =false
 	self._TempSignalNotify =nil
 
-	return self.SetDeviceRequest()
+	reply,err:=self.SetDeviceRequest()
+	if(err!=nil){
+		return err
+	}
+	if(!reply.Success){
+		return errors.New(reply.ErrMsg)
+	}
+	return nil
 }
 
 

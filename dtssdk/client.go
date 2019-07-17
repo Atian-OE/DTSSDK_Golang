@@ -79,7 +79,7 @@ func (self *DTSSDKClient)connect()  {
 	if(self.connected){
 		return
 	}
-	tcpaddr, err := net.ResolveTCPAddr("tcp4", fmt.Sprintf("%s:17082",self.addr))
+	tcpaddr, err := net.ResolveTCPAddr("tcp4", fmt.Sprintf("%s:17083",self.addr))
 	if(err!=nil){
 		return
 	}
