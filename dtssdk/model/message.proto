@@ -58,15 +58,16 @@ message DeviceEvent{
 //防区
 message DefenceZone{
     int32 ID=1;
-    string ZoneName=2;
-    float Start=3;
-    float Finish=4;
-    string Tag=5;
-    DefenceAreaState AlarmType=6;
-    float AlarmLoc=7;
-    float MaxTemperature=8;
-    float MinTemperature=9;
-    float AverageTemperature=10;
+    int32 ChannelID=2;
+    string ZoneName=3;
+    float Start=4;
+    float Finish=5;
+    string Tag=6;
+    DefenceAreaState AlarmType=7;
+    float AlarmLoc=8;
+    float MaxTemperature=9;
+    float MinTemperature=10;
+    float AverageTemperature=11;
 }
 
 //设置设备请求
