@@ -186,7 +186,6 @@ func (self *DTSSDKClient)client_handle(conn net.Conn)  {
 // true 处理完成 false 循环继续处理
 func (self *DTSSDKClient)unpack(cache *bytes.Buffer,conn net.Conn) bool {
 	if(cache.Len()<5){
-		//cache.Reset()
 		return true
 	}
 	buf:=cache.Bytes()
@@ -203,8 +202,6 @@ func (self *DTSSDKClient)unpack(cache *bytes.Buffer,conn net.Conn) bool {
 
 	return false
 }
-
-
 
 
 

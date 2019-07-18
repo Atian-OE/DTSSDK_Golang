@@ -63,9 +63,10 @@ message DefenceZone{
     float Finish=4;
     string Tag=5;
     DefenceAreaState AlarmType=6;
-    float MaxTemperature=7;
-    float MinTemperature=8;
-    float AverageTemperature=9;
+    float AlarmLoc=7;
+    float MaxTemperature=8;
+    float MinTemperature=9;
+    float AverageTemperature=10;
 }
 
 //设置设备请求
