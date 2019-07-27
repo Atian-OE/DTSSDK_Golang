@@ -134,13 +134,14 @@ message DeviceEventNotify{
    float ChannelLength=6;
 }
 
-//设备状态， 广播
+//温度信号， 广播
 message TempSignalNotify{
   string DeviceID=1;
   string Line=2;
   int32 ChannelID=3;
-  repeated float Signal=4;
-  int64 Timestamp=5;
+  float RealLength=4;
+  repeated float Signal=5;
+  int64 Timestamp=6;
 }
 
 //心跳

@@ -12,7 +12,7 @@ import (
 
 func main()  {
 
-
+fmt.Println(time.Now())
 
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
