@@ -252,6 +252,9 @@ func (self*DTSSDKClient)Close() {
 	self.wait_pack_timeout_over<-0
 	close(self.wait_pack_timeout_over)
 
-	self.sess.Close()
+	if(self.sess!=nil){
+		self.sess.Close()
+	}
+
 	self.sess=nil
 }
