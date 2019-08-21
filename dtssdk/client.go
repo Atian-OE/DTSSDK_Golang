@@ -76,23 +76,25 @@ func(self *DTSSDKClient)init(addr string)  {
 
 
 func (self *DTSSDKClient)connect()  {
-	if(self.connected){
+	if self.connected {
 		return
 	}
-	tcpaddr, err := net.ResolveTCPAddr("tcp4", fmt.Sprintf("%s:17083",self.addr))
-	if(err!=nil){
-		return
-	}
-	conn, err := net.DialTCP("tcp", nil, tcpaddr)
-	if(err!=nil){
+
+	conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:17083",self.addr),time.Second*3)
+	if err!=nil {
 		//fmt.Println("连接服务器失败!")
 		return
 	}
-	self.sess=conn
+	tcpConn, ok := conn.(*net.TCPConn)
+	if !ok {
+		//fmt.Println("连接服务器失败!")
+		return
+	}
+	self.sess=tcpConn
 	//禁用缓存
-	conn.SetWriteBuffer(5000)
-	conn.SetReadBuffer(5000)
-	go self.client_handle(conn)
+	tcpConn.SetWriteBuffer(5000)
+	tcpConn.SetReadBuffer(5000)
+	go self.client_handle(tcpConn)
 }
 
 func (self *DTSSDKClient)reconnect()  {

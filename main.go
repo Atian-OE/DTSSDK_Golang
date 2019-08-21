@@ -18,7 +18,7 @@ fmt.Println(time.Now())
 	signal.Notify(ch, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	fmt.Println("start")
 
-	client:= dtssdk.NewDTSClient("192.168.0.50")
+	client:= dtssdk.NewDTSClient("127.0.0.1")
 
 	client.CallConnected(func(addr string) {
 		fmt.Println(fmt.Sprintf("连接成功:%s!",addr))
