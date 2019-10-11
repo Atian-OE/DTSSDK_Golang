@@ -18,6 +18,10 @@ enum MsgID{
     TempSignalNotifyID=9;
     GetDeviceIDRequestID=10;
     GetDeviceIDReplyID=11;
+    CancelSoundRequestID=12;
+    CancelSoundReplyID=13;
+    ResetAlarmRequestID=14;
+    ResetAlarmReplyID=15;
 
     HeartBeatID=250;
 }
@@ -50,9 +54,8 @@ message DeviceEvent{
     int32 ChannelID=1;
     string DeviceID=2;
     int64 Timestamp=3;
-    string Line=4;
-    FiberState EventType=5;
-    float ChannelLength=6;
+    FiberState EventType=4;
+    float ChannelLength=5;
 }
 
 //防区
@@ -109,6 +112,27 @@ message GetDeviceIDReply{
   string DeviceID=3;
 }
 
+//消音请求
+message CancelSoundRequest{
+
+}
+
+//消音回执
+message CancelSoundReply{
+   bool Success=1;
+   string ErrMsg=2;
+}
+
+//重置警报请求
+message ResetAlarmRequest{
+
+}
+
+//重置警报回执
+message ResetAlarmReply{
+   bool Success=1;
+   string ErrMsg=2;
+}
 
 //防区温度，广播
 message ZoneTempNotify{
@@ -129,19 +153,17 @@ message DeviceEventNotify{
    int32 ChannelID=1;
    string DeviceID=2;
    int64 Timestamp=3;
-   string Line=4;
-   FiberState EventType=5;
-   float ChannelLength=6;
+   FiberState EventType=4;
+   float ChannelLength=5;
 }
 
 //温度信号， 广播
 message TempSignalNotify{
   string DeviceID=1;
-  string Line=2;
-  int32 ChannelID=3;
-  float RealLength=4;
-  repeated float Signal=5;
-  int64 Timestamp=6;
+  int32 ChannelID=2;
+  float RealLength=3;
+  repeated float Signal=4;
+  int64 Timestamp=5;
 }
 
 //心跳

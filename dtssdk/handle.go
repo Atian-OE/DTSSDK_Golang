@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/Atian-OE/DTSSDK_Golang/dtssdk/model"
 	"github.com/golang/protobuf/proto"
+	"log"
 	"net"
 )
 
@@ -20,8 +21,8 @@ func (self*DTSSDKClient)tcp_handle(msg_id model.MsgID, data []byte,conn net.Conn
 		}
 		return true
 	})
-
-	if(is_handled){
+	log.Print(model.MsgID(msg_id),"____")
+	if is_handled {
 		return
 	}
 
@@ -351,6 +352,84 @@ func (self*DTSSDKClient)GetDeviceID() (*model.GetDeviceIDReply,error) {
 
 
 	if(err!=nil){
+		return nil,err
+	}
+
+	return reply.rep,reply.err
+}
+
+
+//消音
+func (self*DTSSDKClient)CancelSound() (*model.CancelSoundReply,error) {
+	req:=&model.CancelSoundRequest{}
+
+	err:=self.Send(req)
+	if err!=nil {
+		return nil,err
+	}
+
+	type ReplyStruct struct {
+		rep *model.CancelSoundReply
+		err error
+	}
+
+	wait:=make(chan ReplyStruct)
+
+	call:= func(msg_id model.MsgID,data []byte,conn net.Conn,err error) {
+		if err!=nil {
+			wait<-ReplyStruct{nil,err}
+			return
+		}
+		reply:=model.CancelSoundReply{}
+		err=proto.Unmarshal(data, &reply)
+		wait<-ReplyStruct{&reply,err}
+	}
+
+	self.wait_pack(model.MsgID_CancelSoundReplyID, &call)
+
+	reply:=<-wait
+
+
+	if err!=nil {
+		return nil,err
+	}
+
+	return reply.rep,reply.err
+}
+
+
+//消音
+func (self*DTSSDKClient)ResetAlarm() (*model.ResetAlarmReply,error) {
+	req:=&model.ResetAlarmRequest{}
+
+	err:=self.Send(req)
+	if err!=nil {
+		return nil,err
+	}
+
+	type ReplyStruct struct {
+		rep *model.ResetAlarmReply
+		err error
+	}
+
+	wait:=make(chan ReplyStruct)
+
+	call:= func(msg_id model.MsgID,data []byte,conn net.Conn,err error) {
+		if err!=nil {
+			wait<-ReplyStruct{nil,err}
+			return
+		}
+		reply:=model.ResetAlarmReply{}
+		err=proto.Unmarshal(data, &reply)
+		wait<-ReplyStruct{&reply,err}
+	}
+
+	self.wait_pack(model.MsgID_ResetAlarmReplyID, &call)
+
+	reply:=<-wait
+
+
+	if err!=nil {
 		return nil,err
 	}
 

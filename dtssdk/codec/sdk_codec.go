@@ -34,7 +34,14 @@ func Encode(msg_obj interface{}) ([]byte,error) {
 		cache[4]=byte(model.MsgID_DeviceEventNotifyID)
 	case *model.TempSignalNotify:
 		cache[4]=byte(model.MsgID_TempSignalNotifyID)
-
+	case *model.CancelSoundReply:
+		cache[4]=byte(model.MsgID_CancelSoundReplyID)
+	case *model.CancelSoundRequest:
+		cache[4]=byte(model.MsgID_CancelSoundRequestID)
+	case *model.ResetAlarmRequest:
+		cache[4]=byte(model.MsgID_ResetAlarmRequestID)
+	case *model.ResetAlarmReply:
+		cache[4]=byte(model.MsgID_ResetAlarmReplyID)
 	case *model.HeartBeat:
 		cache[4]=byte(model.MsgID_HeartBeatID)
 	}

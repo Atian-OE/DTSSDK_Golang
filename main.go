@@ -18,7 +18,7 @@ fmt.Println(time.Now())
 	signal.Notify(ch, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	fmt.Println("start")
 
-	client:= dtssdk.NewDTSClient("127.0.0.1")
+	client:= dtssdk.NewDTSClient("192.168.0.37")
 
 	client.CallConnected(func(addr string) {
 		fmt.Println(fmt.Sprintf("连接成功:%s!",addr))
@@ -26,7 +26,7 @@ fmt.Println(time.Now())
 	client.CallDisconnected(func(addr string) {
 		fmt.Println(fmt.Sprintf("断开连接:%s!",addr))
 	})
-	time.Sleep(time.Second*2)
+	time.Sleep(time.Second*3)
 
 	rep1,err:= client.GetDeviceID()
 	fmt.Println(err)
@@ -34,7 +34,15 @@ fmt.Println(time.Now())
 
 	rep2,err:= client.GetDefenceZone(1,"")
 	fmt.Println(err)
-	fmt.Println(rep2)
+	fmt.Println("GetDefenceZone",rep2,err)
+
+	rep3,err:= client.CancelSound()
+	fmt.Println(err)
+	fmt.Println("CancelSound",rep3,err)
+
+	rep4,err:= client.ResetAlarm()
+	fmt.Println(err)
+	fmt.Println("ResetAlarm",rep4,err)
 
 
 	err= client.CallZoneTempNotify(func(notify *model.ZoneTempNotify, e error) {
