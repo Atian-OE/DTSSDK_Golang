@@ -13,109 +13,78 @@ import (
 	"time"
 )
 
-type WaitPackStr struct {
-	Key     model.MsgID
-	Timeout int64 //毫秒
-	Call    *func(model.MsgID, []byte, net.Conn, error)
-}
-
-type DTSSDKClient struct {
-	sess                  *net.TCPConn
-	connected             bool
-	waitPackList          *sync.Map        //等待这个包回传
-	waitPackTimeoutTicker *time.Ticker     //等待回传的回调 会在 3秒后 自动删除
-	waitPackTimeoutOver   chan interface{} //关闭自动删除
-	heartBeatTicker       *time.Ticker     //心跳包的发送
-	heartBeatTickerOver   chan interface{} //关闭心跳
-
-	reconnectTicker     *time.Ticker     //自动连接
-	reconnectTickerOver chan interface{} //关闭自动连接
-	ReconnectTimes      int
-
-	addr                     string                                //地址
-	connectedAction          func(string)                          //连接到服务器的回调
-	disconnectedAction       func(string)                          //断开连接到服务器的回调
-	timeoutAction            func(string)                          //连接超时回调
-	_ZoneTempNotifyEnable    bool                                  //接收分区温度更新的通知
-	_ZoneTempNotify          func(*model.ZoneTempNotify, error)    //分区温度更新
-	_ZoneAlarmNotifyEnable   bool                                  //接收温度警报的通知
-	_ZoneAlarmNotify         func(*model.ZoneAlarmNotify, error)   //分区警报通知
-	_FiberStatusNotifyEnable bool                                  //接收设备状态改变的通知
-	_FiberStatusNotify       func(*model.DeviceEventNotify, error) //设备状态通知
-	_TempSignalNotifyEnable  bool                                  //接收设备温度信号的通知
-	_TempSignalNotify        func(*model.TempSignalNotify, error)  //设备状态通知
-}
-
-func NewDTSClient(addr string) *DTSSDKClient {
-	conn := &DTSSDKClient{}
+func NewDTSClient(addr string) *Client {
+	conn := &Client{
+		port: 17083,
+	}
 	conn.init(addr)
 	return conn
 }
 
-func (d *DTSSDKClient) init(addr string) {
-	d.addr = addr
-	d.waitPackList = new(sync.Map)
+func (c *Client) init(addr string) {
+	c.addr = addr
+	c.waitPackList = new(sync.Map)
 
-	d.waitPackTimeoutTicker = time.NewTicker(time.Millisecond * 500)
-	d.waitPackTimeoutOver = make(chan interface{})
-	d.heartBeatTicker = time.NewTicker(time.Second * 5)
-	d.heartBeatTickerOver = make(chan interface{})
-	d.reconnectTicker = time.NewTicker(time.Second * 10)
-	d.reconnectTickerOver = make(chan interface{})
+	c.waitPackTimeoutTicker = time.NewTicker(time.Millisecond * 500)
+	c.waitPackTimeoutOver = make(chan interface{})
+	c.heartBeatTicker = time.NewTicker(time.Second * 5)
+	c.heartBeatTickerOver = make(chan interface{})
+	c.reconnectTicker = time.NewTicker(time.Second * 10)
+	c.reconnectTickerOver = make(chan interface{})
 
-	go d.waitPackTimeout()
-	go d.heartBeat()
-	go d.reconnect()
+	go c.waitPackTimeout()
+	go c.heartBeat()
+	go c.reconnect()
 }
 
-func (d *DTSSDKClient) connect() {
-	if d.connected {
+func (c *Client) connect() {
+	if c.connected {
 		return
 	}
-	conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:17083", d.addr), time.Second*3)
+	conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:%d", c.addr, c.port), time.Second*3)
 	if err != nil {
-		if d.timeoutAction != nil {
-			d.timeoutAction(d.addr)
+		if c.timeoutAction != nil {
+			c.timeoutAction(c.addr)
 		}
 		return
 	}
 	tcpConn, ok := conn.(*net.TCPConn)
 	if !ok {
-		if d.timeoutAction != nil {
-			d.timeoutAction(d.addr)
+		if c.timeoutAction != nil {
+			c.timeoutAction(c.addr)
 		}
 		return
 	}
-	d.sess = tcpConn
+	c.sess = tcpConn
 	//禁用缓存
 	_ = tcpConn.SetWriteBuffer(5000)
 	_ = tcpConn.SetReadBuffer(5000)
-	go d.clientHandle(tcpConn)
+	go c.clientHandle(tcpConn)
 }
 
-func (d *DTSSDKClient) reconnect() {
-	d.connected = false
-	d.connect()
+func (c *Client) reconnect() {
+	c.connected = false
+	c.connect()
 	count := 0
 	for {
 		select {
-		case <-d.reconnectTicker.C:
-			if !d.connected {
+		case <-c.reconnectTicker.C:
+			if !c.connected {
 				count += 1
-				if d.ReconnectTimes == 0 {
-					log.Println(fmt.Sprintf("正在无限尝试第[ %d ]次重新连接...", count))
-					d.connect()
+				if c.reconnectTimes == 0 {
+					log.Println(fmt.Sprintf("DTSSDK客户端正在无限尝试第[ %d ]次重新连接[ %s ]...", count, c.addr))
+					c.connect()
 				} else {
-					if count < d.ReconnectTimes {
-						log.Println(fmt.Sprintf("正在尝试第[ %d ]次重新连接...", count))
-						d.connect()
+					if count < c.reconnectTimes {
+						log.Println(fmt.Sprintf("DTSSDK客户端正在尝试第[ %d ]次重新连接[ %s ]...", count, c.addr))
+						c.connect()
 					} else {
-						log.Println(fmt.Sprintf("第[ %d ]次重新连接失败,断开连接...", count))
-						d.Close()
+						log.Println(fmt.Sprintf("DTSSDK客户端第[ %d ]次重新连接失败,断开连接[ %s ]...", count, c.addr))
+						c.Close()
 					}
 				}
 			}
-		case <-d.reconnectTickerOver:
+		case <-c.reconnectTickerOver:
 			return
 
 		}
@@ -123,49 +92,49 @@ func (d *DTSSDKClient) reconnect() {
 }
 
 //心跳
-func (d *DTSSDKClient) heartBeat() {
+func (c *Client) heartBeat() {
 	for {
 		select {
-		case <-d.heartBeatTicker.C:
-			if d.connected {
+		case <-c.heartBeatTicker.C:
+			if c.connected {
 				b, _ := codec.Encode(&model.HeartBeat{})
-				_, _ = d.sess.Write(b)
+				_, _ = c.sess.Write(b)
 			}
 
-		case <-d.heartBeatTickerOver:
+		case <-c.heartBeatTickerOver:
 			return
 		}
 	}
 }
 
 //超时删除回调
-func (d *DTSSDKClient) waitPackTimeout() {
+func (c *Client) waitPackTimeout() {
 	for {
 		select {
-		case <-d.waitPackTimeoutTicker.C:
-			d.waitPackList.Range(func(key, value interface{}) bool {
+		case <-c.waitPackTimeoutTicker.C:
+			c.waitPackList.Range(func(key, value interface{}) bool {
 
 				v := value.(*WaitPackStr)
 				v.Timeout -= 500
 				if v.Timeout <= 0 {
 					go (*v.Call)(0, nil, nil, errors.New("callback timeout"))
-					d.waitPackList.Delete(key)
+					c.waitPackList.Delete(key)
 				}
 				return true
 			})
 
-		case <-d.waitPackTimeoutOver:
+		case <-c.waitPackTimeoutOver:
 			return
 
 		}
 	}
 }
 
-func (d *DTSSDKClient) clientHandle(conn net.Conn) {
-	d.tcpHandle(model.MsgID_ConnectID, nil, conn)
+func (c *Client) clientHandle(conn net.Conn) {
+	c.tcpHandle(model.MsgID_ConnectID, nil, conn)
 	defer func() {
 		if conn != nil {
-			d.tcpHandle(model.MsgID_DisconnectID, nil, conn)
+			c.tcpHandle(model.MsgID_DisconnectID, nil, conn)
 			_ = conn.Close()
 		}
 	}()
@@ -183,7 +152,7 @@ func (d *DTSSDKClient) clientHandle(conn net.Conn) {
 
 		cache.Write(buf[:n])
 		for {
-			if d.unpack(&cache, conn) {
+			if c.unpack(&cache, conn) {
 				break
 			}
 		}
@@ -192,7 +161,7 @@ func (d *DTSSDKClient) clientHandle(conn net.Conn) {
 }
 
 // true 处理完成 false 循环继续处理
-func (d *DTSSDKClient) unpack(cache *bytes.Buffer, conn net.Conn) bool {
+func (c *Client) unpack(cache *bytes.Buffer, conn net.Conn) bool {
 	if cache.Len() < 5 {
 		return true
 	}
@@ -204,7 +173,7 @@ func (d *DTSSDKClient) unpack(cache *bytes.Buffer, conn net.Conn) bool {
 	}
 
 	cmd := buf[4]
-	d.tcpHandle(model.MsgID(cmd), buf[:pkgSize+5], conn)
+	c.tcpHandle(model.MsgID(cmd), buf[:pkgSize+5], conn)
 	cache.Reset()
 	cache.Write(buf[5+pkgSize:])
 
@@ -212,53 +181,53 @@ func (d *DTSSDKClient) unpack(cache *bytes.Buffer, conn net.Conn) bool {
 }
 
 //这个包会由这个回调接受
-func (d *DTSSDKClient) waitPack(msgId model.MsgID, call *func(model.MsgID, []byte, net.Conn, error)) {
-	d.waitPackList.Store(call, &WaitPackStr{Key: msgId, Timeout: 10000, Call: call})
+func (c *Client) waitPack(msgId model.MsgID, call *func(model.MsgID, []byte, net.Conn, error)) {
+	c.waitPackList.Store(call, &WaitPackStr{Key: msgId, Timeout: 10000, Call: call})
 }
 
 //删除这个回调
-func (d *DTSSDKClient) deleteWaitPackFunc(call *func(model.MsgID, []byte, net.Conn, error)) {
+func (c *Client) deleteWaitPackFunc(call *func(model.MsgID, []byte, net.Conn, error)) {
 
-	value, ok := d.waitPackList.Load(call)
+	value, ok := c.waitPackList.Load(call)
 	if ok {
 		v := value.(*WaitPackStr)
 		go (*v.Call)(0, nil, nil, errors.New("cancel callback"))
-		d.waitPackList.Delete(call)
+		c.waitPackList.Delete(call)
 	}
 
 }
 
 //发送消息
-func (d *DTSSDKClient) Send(msgObj interface{}) error {
+func (c *Client) Send(msgObj interface{}) error {
 	b, err := codec.Encode(msgObj)
 	if err != nil {
 		return err
 	}
-	if !d.connected {
-		return errors.New("client not connected")
+	if !c.connected {
+		return ErrClientNotConnect(c.addr)
 	}
-	_, err = d.sess.Write(b)
+	_, err = c.sess.Write(b)
 	return err
 }
 
 //关闭
-func (d *DTSSDKClient) Close() {
+func (c *Client) Close() {
 
-	d.reconnectTicker.Stop()
-	d.reconnectTickerOver <- 0
-	close(d.reconnectTickerOver)
+	c.reconnectTicker.Stop()
+	c.reconnectTickerOver <- 0
+	close(c.reconnectTickerOver)
 
-	d.heartBeatTicker.Stop()
-	d.heartBeatTickerOver <- 0
-	close(d.heartBeatTickerOver)
+	c.heartBeatTicker.Stop()
+	c.heartBeatTickerOver <- 0
+	close(c.heartBeatTickerOver)
 
-	d.waitPackTimeoutTicker.Stop()
-	d.waitPackTimeoutOver <- 0
-	close(d.waitPackTimeoutOver)
+	c.waitPackTimeoutTicker.Stop()
+	c.waitPackTimeoutOver <- 0
+	close(c.waitPackTimeoutOver)
 
-	if d.sess != nil {
-		_ = d.sess.Close()
+	if c.sess != nil {
+		_ = c.sess.Close()
 	}
 
-	d.sess = nil
+	c.sess = nil
 }

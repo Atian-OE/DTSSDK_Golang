@@ -11,8 +11,8 @@ import (
 func main() {
 
 	fmt.Println(time.Now())
-	client := dtssdk.NewDTSClient("192.168.0.37")
-	client.ReconnectTimes = 10
+	client := dtssdk.NewDTSClient("192.168.0.137")
+	client.SetReconnectTimes(10)
 	client.CallConnected(func(addr string) {
 		log.Println(fmt.Sprintf("连接成功:%s!", addr))
 	})
