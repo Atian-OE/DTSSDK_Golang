@@ -10,11 +10,11 @@ import (
 func (d *DTSSDKClient) tcpHandle(msgId model.MsgID, data []byte, conn net.Conn) {
 
 	var isHandled bool
-	d.wait_pack_list.Range(func(key, value interface{}) bool {
+	d.waitPackList.Range(func(key, value interface{}) bool {
 		v := value.(*WaitPackStr)
 		if v.Key == msgId {
 			go (*v.Call)(msgId, data[5:], conn, nil)
-			d.wait_pack_list.Delete(key)
+			d.waitPackList.Delete(key)
 			isHandled = true
 			return false
 		}
@@ -34,10 +34,10 @@ func (d *DTSSDKClient) tcpHandle(msgId model.MsgID, data []byte, conn net.Conn) 
 	case model.MsgID_DisconnectID:
 		d.connected = false
 
-		d.wait_pack_list.Range(func(key, value interface{}) bool {
+		d.waitPackList.Range(func(key, value interface{}) bool {
 			v := value.(*WaitPackStr)
 			go (*v.Call)(0, nil, nil, errors.New("client disconnect"))
-			d.wait_pack_list.Delete(key)
+			d.waitPackList.Delete(key)
 			return true
 		})
 
@@ -124,6 +124,11 @@ func (d *DTSSDKClient) CallConnected(call func(string)) {
 //回调断开连接服务器
 func (d *DTSSDKClient) CallDisconnected(call func(string)) {
 	d.disconnectedAction = call
+}
+
+//超时回调
+func (d *DTSSDKClient) CallOntimeout(call func(string)) {
+	d.timeoutAction = call
 }
 
 //回调分区温度更新的通知
