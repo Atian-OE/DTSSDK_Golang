@@ -6,6 +6,7 @@ import (
 	"github.com/Atian-OE/DTSSDK_Golang/dtssdk/codec"
 	"github.com/Atian-OE/DTSSDK_Golang/dtssdk/model"
 	"github.com/Atian-OE/DTSSDK_Golang/dtssdk/utils"
+	uuid "github.com/iris-contrib/go.uuid"
 	"github.com/kataras/iris/core/errors"
 	"log"
 	"net"
@@ -22,6 +23,14 @@ func NewDTSClient(addr string) *Client {
 }
 
 func (c *Client) init(addr string) {
+	if c.Id() == "" {
+		v4, err := uuid.NewV4()
+		if err != nil {
+			c.SetId("")
+		} else {
+			c.SetId(v4.String())
+		}
+	}
 	c.addr = addr
 	c.waitPackList = new(sync.Map)
 
@@ -29,7 +38,7 @@ func (c *Client) init(addr string) {
 	c.waitPackTimeoutOver = make(chan interface{})
 	c.heartBeatTicker = time.NewTicker(time.Second * 5)
 	c.heartBeatTickerOver = make(chan interface{})
-	c.reconnectTicker = time.NewTicker(time.Second * 10)
+	c.reconnectTicker = time.NewTicker(time.Second * c.ReconnectTime())
 	c.reconnectTickerOver = make(chan interface{})
 
 	go c.waitPackTimeout()
@@ -75,11 +84,11 @@ func (c *Client) reconnect() {
 					log.Println(fmt.Sprintf("DTSSDK客户端正在无限尝试第[ %d ]次重新连接[ %s ]...", count, c.addr))
 					c.connect()
 				} else {
-					if count < c.reconnectTimes {
+					if count <= c.reconnectTimes {
 						log.Println(fmt.Sprintf("DTSSDK客户端正在尝试第[ %d ]次重新连接[ %s ]...", count, c.addr))
 						c.connect()
 					} else {
-						log.Println(fmt.Sprintf("DTSSDK客户端第[ %d ]次重新连接失败,断开连接[ %s ]...", count, c.addr))
+						log.Println(fmt.Sprintf("DTSSDK客户端第[ %d ]次重新连接失败,断开连接[ %s ]...", count-1, c.addr))
 						c.Close()
 					}
 				}

@@ -15,11 +15,12 @@ type WaitPackStr struct {
 	Call    *func(model.MsgID, []byte, net.Conn, error)
 }
 
-type Client = DTSSDKClient
-
 // Deprecated
-type DTSSDKClient struct {
+type DTSSDKClient = Client
+
+type Client struct {
 	sess                  *net.TCPConn
+	id                    string
 	connected             bool
 	waitPackList          *sync.Map        //等待这个包回传
 	waitPackTimeoutTicker *time.Ticker     //等待回传的回调 会在 3秒后 自动删除
@@ -27,6 +28,7 @@ type DTSSDKClient struct {
 	heartBeatTicker       *time.Ticker     //心跳包的发送
 	heartBeatTickerOver   chan interface{} //关闭心跳
 
+	reconnectTime       time.Duration    //重连时间
 	reconnectTicker     *time.Ticker     //自动连接
 	reconnectTickerOver chan interface{} //关闭自动连接
 
@@ -56,6 +58,19 @@ var (
 	}
 )
 
+func (c *Client) isConnected() bool {
+	return c.connected
+}
+
+func (c *Client) Id() string {
+	return c.id
+}
+
+func (c *Client) SetId(id string) *Client {
+	c.id = id
+	return c
+}
+
 func (c *Client) Port() int {
 	return c.port
 }
@@ -71,5 +86,17 @@ func (c *Client) ReconnectTimes() int {
 
 func (c *Client) SetReconnectTimes(reconnectTimes int) *Client {
 	c.reconnectTimes = reconnectTimes
+	return c
+}
+
+func (c *Client) ReconnectTime() time.Duration {
+	if c.reconnectTime == 0 {
+		c.reconnectTime = 10
+	}
+	return c.reconnectTime
+}
+
+func (c *Client) SetReconnectTime(reconnectTime time.Duration) *Client {
+	c.reconnectTime = reconnectTime
 	return c
 }
