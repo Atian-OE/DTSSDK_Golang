@@ -58,7 +58,7 @@ var (
 	}
 )
 
-func (c *Client) isConnected() bool {
+func (c *Client) IsConnected() bool {
 	return c.connected
 }
 
