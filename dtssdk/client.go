@@ -237,6 +237,6 @@ func (c *Client) Close() {
 	if c.sess != nil {
 		_ = c.sess.Close()
 	}
-
+	c.connected = false
 	c.sess = nil
 }
