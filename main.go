@@ -11,18 +11,21 @@ import (
 func main() {
 
 	fmt.Println(time.Now())
-	client := dtssdk.NewDTSClient("192.168.0.137")
-	client.SetReconnectTimes(3).
+	client := dtssdk.NewDTSClient("192.168.0.215")
+	client.SetReconnectTimes(10).
 		SetReconnectTime(10).
 		SetId("10")
 	client.CallConnected(func(addr string) {
 		log.Println(fmt.Sprintf("连接成功:%s!", addr))
+		log.Println(client.IsReconnecting())
 	})
 	client.CallDisconnected(func(addr string) {
 		log.Println(fmt.Sprintf("断开连接:%s!", addr))
+		log.Println(client.IsReconnecting())
 	})
 	client.CallOntimeout(func(addr string) {
 		log.Println(fmt.Sprintf("连接超时:%s!", addr))
+		log.Println(client.IsReconnecting())
 	})
 	time.Sleep(time.Second * 3)
 

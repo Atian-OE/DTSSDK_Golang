@@ -22,6 +22,8 @@ type Client struct {
 	sess                  *net.TCPConn
 	id                    string
 	connected             bool
+	count                 int
+	reconnecting          bool             //正在重新连接的标志
 	waitPackList          *sync.Map        //等待这个包回传
 	waitPackTimeoutTicker *time.Ticker     //等待回传的回调 会在 3秒后 自动删除
 	waitPackTimeoutOver   chan interface{} //关闭自动删除
@@ -57,6 +59,10 @@ var (
 		return errors.New(fmt.Sprintf("DTS客户端[ %s接口 ]未添加回调函数", name))
 	}
 )
+
+func (c *Client) IsReconnecting() bool {
+	return c.reconnecting
+}
 
 func (c *Client) IsConnected() bool {
 	return c.connected

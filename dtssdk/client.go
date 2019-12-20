@@ -47,6 +47,7 @@ func (c *Client) init(addr string) {
 }
 
 func (c *Client) connect() {
+	c.reconnecting = true
 	if c.connected {
 		return
 	}
@@ -74,28 +75,27 @@ func (c *Client) connect() {
 func (c *Client) reconnect() {
 	c.connected = false
 	c.connect()
-	count := 0
 	for {
 		select {
 		case <-c.reconnectTicker.C:
 			if !c.connected {
-				count += 1
+				c.count += 1
 				if c.reconnectTimes == 0 {
-					log.Println(fmt.Sprintf("DTSSDK客户端正在无限尝试第[ %d ]次重新连接[ %s ]...", count, c.addr))
+					log.Println(fmt.Sprintf("[ 客户端%s ]正在无限尝试第[ %d/%d ]次重新连接[ %s ]...", c.Id(), c.count, c.reconnectTimes, c.addr))
 					c.connect()
 				} else {
-					if count <= c.reconnectTimes {
-						log.Println(fmt.Sprintf("DTSSDK客户端正在尝试第[ %d ]次重新连接[ %s ]...", count, c.addr))
+					if c.count <= c.reconnectTimes {
+						log.Println(fmt.Sprintf("[ 客户端%s ]正在尝试第[ %d/%d ]次重新连接[ %s ]...", c.Id(), c.count, c.reconnectTimes, c.addr))
 						c.connect()
 					} else {
-						log.Println(fmt.Sprintf("DTSSDK客户端第[ %d ]次重新连接失败,断开连接[ %s ]...", count-1, c.addr))
+						log.Println(fmt.Sprintf("[ 客户端%s ]第[ %d/%d ]次重新连接失败,断开连接[ %s ]...", c.Id(), c.count-1, c.reconnectTimes, c.addr))
 						c.Close()
 					}
 				}
 			}
 		case <-c.reconnectTickerOver:
+			log.Println(fmt.Sprintf("[ 客户端%s ]断开连接[ %s ]...", c.Id(), c.addr))
 			return
-
 		}
 	}
 }
@@ -237,6 +237,8 @@ func (c *Client) Close() {
 	if c.sess != nil {
 		_ = c.sess.Close()
 	}
+	c.count = 0
+	c.reconnecting = false
 	c.connected = false
 	c.sess = nil
 }

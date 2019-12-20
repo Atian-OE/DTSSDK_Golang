@@ -26,6 +26,8 @@ func (c *Client) tcpHandle(msgId model.MsgID, data []byte, conn net.Conn) {
 	switch msgId {
 	case model.MsgID_ConnectID:
 		c.connected = true
+		c.reconnecting = false
+		c.count = 0
 		go c.SetDeviceRequest()
 		if c.connectedAction != nil {
 			go c.connectedAction(c.addr)
