@@ -38,6 +38,7 @@ type Client struct {
 	addr                     string                                //地址
 	port                     int                                   //端口 默认17083
 	connectedAction          func(string)                          //连接到服务器的回调
+	closedAction             func()                                //连接到服务器的回调
 	disconnectedAction       func(string)                          //断开连接到服务器的回调
 	timeoutAction            func(string)                          //连接超时回调
 	_ZoneTempNotifyEnable    bool                                  //接收分区温度更新的通知

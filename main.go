@@ -9,11 +9,10 @@ import (
 )
 
 func main() {
-
 	fmt.Println(time.Now())
-	client := dtssdk.NewDTSClient("192.168.0.215")
-	client.SetReconnectTimes(10).
-		SetReconnectTime(10).
+	client := dtssdk.NewDTSClient("192.168.10.215")
+	client.SetReconnectTimes(3).
+		SetReconnectTime(6).
 		SetId("10")
 	client.CallConnected(func(addr string) {
 		log.Println(fmt.Sprintf("连接成功:%s!", addr))
@@ -64,7 +63,9 @@ func main() {
 		fmt.Println("CallZoneAlarmNotify" + notify.DeviceID)
 	})
 	fmt.Println("CallZoneAlarmNotify", err)
-
+	client.CallOnClosed(func() {
+		log.Println("over")
+	})
 	time.Sleep(time.Hour)
 	client.Close()
 	fmt.Println("quit")

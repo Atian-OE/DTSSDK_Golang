@@ -35,7 +35,7 @@ func (c *Client) tcpHandle(msgId model.MsgID, data []byte, conn net.Conn) {
 
 	case model.MsgID_DisconnectID:
 		c.connected = false
-
+		c.reconnecting = false
 		c.waitPackList.Range(func(key, value interface{}) bool {
 			v := value.(*WaitPackStr)
 			go (*v.Call)(0, nil, nil, ErrClientNotConnect(c.addr))
@@ -131,6 +131,11 @@ func (c *Client) CallDisconnected(call func(string)) {
 //超时回调
 func (c *Client) CallOntimeout(call func(string)) {
 	c.timeoutAction = call
+}
+
+//超时回调
+func (c *Client) CallOnClosed(call func()) {
+	c.closedAction = call
 }
 
 //回调分区温度更新的通知

@@ -40,9 +40,6 @@ func (c *Client) init(addr string) {
 	c.heartBeatTickerOver = make(chan interface{})
 	c.reconnectTicker = time.NewTicker(time.Second * c.ReconnectTime())
 	c.reconnectTickerOver = make(chan interface{})
-
-	go c.waitPackTimeout()
-	go c.heartBeat()
 	go c.reconnect()
 }
 
@@ -54,14 +51,14 @@ func (c *Client) connect() {
 	conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:%d", c.addr, c.port), time.Second*3)
 	if err != nil {
 		if c.timeoutAction != nil {
-			c.timeoutAction(c.addr)
+			go c.timeoutAction(c.addr)
 		}
 		return
 	}
 	tcpConn, ok := conn.(*net.TCPConn)
 	if !ok {
 		if c.timeoutAction != nil {
-			c.timeoutAction(c.addr)
+			go c.timeoutAction(c.addr)
 		}
 		return
 	}
@@ -69,6 +66,8 @@ func (c *Client) connect() {
 	//禁用缓存
 	_ = tcpConn.SetWriteBuffer(5000)
 	_ = tcpConn.SetReadBuffer(5000)
+	go c.waitPackTimeout()
+	go c.heartBeat()
 	go c.clientHandle(tcpConn)
 }
 
@@ -122,7 +121,6 @@ func (c *Client) waitPackTimeout() {
 		select {
 		case <-c.waitPackTimeoutTicker.C:
 			c.waitPackList.Range(func(key, value interface{}) bool {
-
 				v := value.(*WaitPackStr)
 				v.Timeout -= 500
 				if v.Timeout <= 0 {
@@ -134,7 +132,6 @@ func (c *Client) waitPackTimeout() {
 
 		case <-c.waitPackTimeoutOver:
 			return
-
 		}
 	}
 }
@@ -166,7 +163,6 @@ func (c *Client) clientHandle(conn net.Conn) {
 			}
 		}
 	}
-
 }
 
 // true 处理完成 false 循环继续处理
@@ -221,17 +217,18 @@ func (c *Client) Send(msgObj interface{}) error {
 
 //关闭
 func (c *Client) Close() {
-
+	if c.connected {
+		c.waitPackTimeoutOver <- 0
+		c.heartBeatTickerOver <- 0
+		c.reconnectTickerOver <- 0
+	}
 	c.reconnectTicker.Stop()
-	c.reconnectTickerOver <- 0
 	close(c.reconnectTickerOver)
 
 	c.heartBeatTicker.Stop()
-	c.heartBeatTickerOver <- 0
 	close(c.heartBeatTickerOver)
 
 	c.waitPackTimeoutTicker.Stop()
-	c.waitPackTimeoutOver <- 0
 	close(c.waitPackTimeoutOver)
 
 	if c.sess != nil {
@@ -241,4 +238,7 @@ func (c *Client) Close() {
 	c.reconnecting = false
 	c.connected = false
 	c.sess = nil
+	if c.closedAction != nil {
+		c.closedAction()
+	}
 }
