@@ -38,7 +38,7 @@ func (c *Client) init(addr string) {
 	c.waitPackTimeoutOver = make(chan interface{})
 	c.heartBeatTicker = time.NewTicker(time.Second * 5)
 	c.heartBeatTickerOver = make(chan interface{})
-	c.reconnectTicker = time.NewTicker(time.Second * c.ReconnectTime())
+	c.reconnectTicker = time.NewTicker(c.ReconnectTime())
 	c.reconnectTickerOver = make(chan interface{})
 	go c.reconnect()
 }
@@ -78,19 +78,21 @@ func (c *Client) reconnect() {
 		select {
 		case <-c.reconnectTicker.C:
 			if !c.connected {
-				c.count += 1
-				if c.reconnectTimes == 0 {
-					log.Println(fmt.Sprintf("[ 客户端%s ]正在无限尝试第[ %d/%d ]次重新连接[ %s ]...", c.Id(), c.count, c.reconnectTimes, c.addr))
-					c.connect()
-				} else {
-					if c.count <= c.reconnectTimes {
-						log.Println(fmt.Sprintf("[ 客户端%s ]正在尝试第[ %d/%d ]次重新连接[ %s ]...", c.Id(), c.count, c.reconnectTimes, c.addr))
+				go func() {
+					c.count += 1
+					if c.reconnectTimes == 0 {
+						log.Println(fmt.Sprintf("[ 客户端%s ]正在无限尝试第[ %d/%d ]次重新连接[ %s ]...", c.Id(), c.count, c.reconnectTimes, c.addr))
 						c.connect()
 					} else {
-						log.Println(fmt.Sprintf("[ 客户端%s ]第[ %d/%d ]次重新连接失败,断开连接[ %s ]...", c.Id(), c.count-1, c.reconnectTimes, c.addr))
-						c.Close()
+						if c.count <= c.reconnectTimes {
+							log.Println(fmt.Sprintf("[ 客户端%s ]正在尝试第[ %d/%d ]次重新连接[ %s ]...", c.Id(), c.count, c.reconnectTimes, c.addr))
+							c.connect()
+						} else {
+							log.Println(fmt.Sprintf("[ 客户端%s ]第[ %d/%d ]次重新连接失败,断开连接[ %s ]...", c.Id(), c.count-1, c.reconnectTimes, c.addr))
+							c.Close()
+						}
 					}
-				}
+				}()
 			}
 		case <-c.reconnectTickerOver:
 			log.Println(fmt.Sprintf("[ 客户端%s ]断开连接[ %s ]...", c.Id(), c.addr))
@@ -217,27 +219,24 @@ func (c *Client) Send(msgObj interface{}) error {
 
 //关闭
 func (c *Client) Close() {
-	if c.connected {
-		c.waitPackTimeoutOver <- 0
+
+	if c.sess != nil {
 		c.heartBeatTickerOver <- 0
-		c.reconnectTickerOver <- 0
+		c.heartBeatTicker.Stop()
+		close(c.heartBeatTickerOver)
+		c.waitPackTimeoutOver <- 0
+		c.waitPackTimeoutTicker.Stop()
+		close(c.waitPackTimeoutOver)
+		_ = c.sess.Close()
+		c.sess = nil
 	}
+	c.reconnectTickerOver <- 0
 	c.reconnectTicker.Stop()
 	close(c.reconnectTickerOver)
 
-	c.heartBeatTicker.Stop()
-	close(c.heartBeatTickerOver)
-
-	c.waitPackTimeoutTicker.Stop()
-	close(c.waitPackTimeoutOver)
-
-	if c.sess != nil {
-		_ = c.sess.Close()
-	}
 	c.count = 0
 	c.reconnecting = false
 	c.connected = false
-	c.sess = nil
 	if c.closedAction != nil {
 		c.closedAction()
 	}
