@@ -221,8 +221,12 @@ func (c *Client) Send(msgObj interface{}) error {
 
 //关闭
 func (c *Client) Close() {
-
-	if c.sess != nil {
+	if c.reconnecting || c.connected {
+		c.reconnectTickerOver <- 0
+		c.reconnectTicker.Stop()
+		close(c.reconnectTickerOver)
+	}
+	if c.sess != nil || c.connected {
 		c.heartBeatTickerOver <- 0
 		c.heartBeatTicker.Stop()
 		close(c.heartBeatTickerOver)
@@ -232,13 +236,6 @@ func (c *Client) Close() {
 		_ = c.sess.Close()
 		c.sess = nil
 	}
-
-	if c.reconnecting || c.connected {
-		c.reconnectTickerOver <- 0
-		c.reconnectTicker.Stop()
-		close(c.reconnectTickerOver)
-	}
-
 	c.count = 0
 	c.reconnecting = false
 	c.connected = false
