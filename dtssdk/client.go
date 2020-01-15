@@ -80,9 +80,11 @@ func (c *Client) reconnect() {
 			if !c.connected {
 				go func() {
 					c.count += 1
-					if c.reconnectTimes == 0 {
+					if c.reconnectTimes < 0 {
 						log.Println(fmt.Sprintf("[ 客户端%s ]正在无限尝试第[ %d ]次重新连接[ %s ]...", c.Id(), c.count, c.addr))
 						c.connect()
+					} else if c.reconnectTimes == 0 {
+						c.Close()
 					} else {
 						if c.count <= c.reconnectTimes {
 							log.Println(fmt.Sprintf("[ 客户端%s ]正在尝试第[ %d/%d ]次重新连接[ %s ]...", c.Id(), c.count, c.reconnectTimes, c.addr))
@@ -230,9 +232,12 @@ func (c *Client) Close() {
 		_ = c.sess.Close()
 		c.sess = nil
 	}
-	c.reconnectTickerOver <- 0
-	c.reconnectTicker.Stop()
-	close(c.reconnectTickerOver)
+
+	if c.reconnecting || c.connected {
+		c.reconnectTickerOver <- 0
+		c.reconnectTicker.Stop()
+		close(c.reconnectTickerOver)
+	}
 
 	c.count = 0
 	c.reconnecting = false
