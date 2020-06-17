@@ -7,15 +7,15 @@ import (
 )
 
 //length 4 msg_id 1  包体 。。。
-func Encode(msg_obj interface{}) ([]byte, error) {
-	data, err := proto.Marshal(msg_obj.(proto.Message))
+func Encode(msgObj interface{}) ([]byte, error) {
+	data, err := proto.Marshal(msgObj.(proto.Message))
 	if err != nil {
 		return nil, err
 	}
 	cache := make([]byte, len(data)+5)
 	length, _ := utils.IntToBytes(int64(len(data)), 4)
 	copy(cache, length)
-	switch msg_obj.(type) {
+	switch msgObj.(type) {
 	case *model.GetDefenceZoneRequest:
 		cache[4] = byte(model.MsgID_GetDefenceZoneRequestID)
 	case *model.GetDefenceZoneReply:
