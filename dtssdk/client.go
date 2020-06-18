@@ -7,6 +7,7 @@ import (
 	"github.com/Atian-OE/DTSSDK_Golang/dtssdk/model"
 	"github.com/Atian-OE/DTSSDK_Golang/dtssdk/utils"
 	"github.com/kataras/iris/core/errors"
+	"log"
 	"net"
 	"sync"
 	"time"
@@ -18,7 +19,11 @@ type WaitPackStr struct {
 	Call    *func(model.MsgID, []byte, net.Conn, error)
 }
 
-type DTSSDKClient struct {
+// Deprecated: users should Client instead
+type DTSSDKClient Client
+
+type Client struct {
+	Options
 	sess                  *net.TCPConn
 	connected             bool
 	waitPackList          *sync.Map        //等待这个包回传
@@ -44,91 +49,109 @@ type DTSSDKClient struct {
 	_TempSignalNotify        func(*model.TempSignalNotify, error)  //设备状态通知
 }
 
-func NewDTSClient(addr string) *DTSSDKClient {
-	conn := &DTSSDKClient{}
-	conn.init(addr)
+func NewClient(o Options) *Client {
+	return &Client{Options: o}
+}
+
+func NewDTSClient(ip string) *Client {
+	conn := &Client{
+		addr: fmt.Sprintf("%s:%d", ip, 17083),
+	}
+	conn.init()
 	return conn
 }
 
-func (c *DTSSDKClient) init(addr string) {
-	c.addr = addr
-	c.waitPackList = new(sync.Map)
-
-	c.waitPackTimeoutTicker = time.NewTicker(time.Millisecond * 500)
-	c.waitPackTimeoutOver = make(chan interface{})
-	c.heartBeatTicker = time.NewTicker(time.Second * 5)
-	c.heartBeatTickerOver = make(chan interface{})
+func (c *Client) init() {
 	c.reconnectTicker = time.NewTicker(time.Second * 10)
 	c.reconnectTickerOver = make(chan interface{})
+	go c.reconnect()
+}
 
+func (c *Client) Connect() (*Client, error) {
+	if c.Ip == "" {
+		return c, errors.New("ip need")
+	}
+	c.addr = fmt.Sprintf("%s:%d", c.Ip, 17083)
+	if c.Timeout == 0 {
+		c.Timeout = time.Second * 3
+	}
+	return c, c.connect()
+}
+
+func (c *Client) connect() error {
+	if c.connected {
+		return nil
+	}
+	conn, err := net.DialTimeout("tcp", c.addr, c.Timeout)
+	if err != nil {
+		log.Println("连接服务器失败!")
+		return err
+	}
+	if tcpConn, ok := conn.(*net.TCPConn); ok {
+		c.sess = tcpConn
+	} else {
+		return errors.New("")
+	}
+
+	if err := c.sess.SetWriteBuffer(5000); err != nil {
+		return err
+	}
+	if err := c.sess.SetReadBuffer(5000); err != nil {
+		return err
+	}
 	go c.waitPackTimeout()
 	go c.heartBeat()
-	go c.reconnect()
-
+	go c.clientHandle(c.sess)
+	return nil
 }
 
-func (c *DTSSDKClient) connect() {
-	if c.connected {
-		return
-	}
-
-	conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:17083", c.addr), time.Second*3)
-	if err != nil {
-		//fmt.Println("连接服务器失败!")
-		return
-	}
-	tcpConn, ok := conn.(*net.TCPConn)
-	if !ok {
-		//fmt.Println("连接服务器失败!")
-		return
-	}
-	c.sess = tcpConn
-	//禁用缓存
-	_ = tcpConn.SetWriteBuffer(5000)
-	_ = tcpConn.SetReadBuffer(5000)
-	go c.clientHandle(tcpConn)
-}
-
-func (c *DTSSDKClient) reconnect() {
+func (c *Client) reconnect() {
 	c.connected = false
 	c.connect()
-
 	for {
 		select {
 		case <-c.reconnectTicker.C:
 			c.connect()
 
 		case <-c.reconnectTickerOver:
+			c.reconnectTicker.Stop()
 			return
-
 		}
 	}
 }
 
 //心跳
-func (c *DTSSDKClient) heartBeat() {
+func (c *Client) heartBeat() {
+	c.heartBeatTicker = time.NewTicker(time.Second * 5)
+	c.heartBeatTickerOver = make(chan interface{})
 	for {
 		select {
 		case <-c.heartBeatTicker.C:
 			if c.connected {
+				log.Println("心跳")
 				b, _ := codec.Encode(&model.HeartBeat{})
-				_, _ = c.sess.Write(b)
+				if _, err := c.sess.Write(b); err != nil {
+					log.Println("发送失败")
+					c.Close()
+				}
 			}
 
 		case <-c.heartBeatTickerOver:
+			c.heartBeatTicker.Stop()
 			return
-
 		}
 	}
 }
 
 //超时删除回调
-func (c *DTSSDKClient) waitPackTimeout() {
+func (c *Client) waitPackTimeout() {
+	c.waitPackList = new(sync.Map)
+	c.waitPackTimeoutTicker = time.NewTicker(time.Millisecond * 500)
+	c.waitPackTimeoutOver = make(chan interface{})
 	for {
 		select {
 		case <-c.waitPackTimeoutTicker.C:
 			c.waitPackList.Range(func(key, value interface{}) bool {
-
 				v := value.(*WaitPackStr)
 				v.Timeout -= 500
 				if v.Timeout <= 0 {
@@ -139,28 +162,19 @@ func (c *DTSSDKClient) waitPackTimeout() {
 			})
 
 		case <-c.waitPackTimeoutOver:
+			c.waitPackTimeoutTicker.Stop()
 			return
-
 		}
 	}
 }
 
-func (c *DTSSDKClient) clientHandle(conn net.Conn) {
+func (c *Client) clientHandle(conn net.Conn) {
 	c.tcpHandle(model.MsgID_ConnectID, nil, conn)
-	defer func() {
-		if conn != nil {
-			c.tcpHandle(model.MsgID_DisconnectID, nil, conn)
-			_ = conn.Close()
-		}
-	}()
-
 	buf := make([]byte, 1024)
 	var cache bytes.Buffer
 	for {
-		//cache_index:=0
 		n, err := conn.Read(buf)
 		//加上上一次的缓存
-		//n=buf_index+n
 		if err != nil {
 			break
 		}
@@ -172,11 +186,10 @@ func (c *DTSSDKClient) clientHandle(conn net.Conn) {
 			}
 		}
 	}
-
 }
 
 // true 处理完成 false 循环继续处理
-func (c *DTSSDKClient) unpack(cache *bytes.Buffer, conn net.Conn) bool {
+func (c *Client) unpack(cache *bytes.Buffer, conn net.Conn) bool {
 	if cache.Len() < 5 {
 		return true
 	}
@@ -196,12 +209,12 @@ func (c *DTSSDKClient) unpack(cache *bytes.Buffer, conn net.Conn) bool {
 }
 
 //这个包会由这个回调接受
-func (c *DTSSDKClient) waitPack(msgId model.MsgID, call *func(model.MsgID, []byte, net.Conn, error)) {
+func (c *Client) waitPack(msgId model.MsgID, call *func(model.MsgID, []byte, net.Conn, error)) {
 	c.waitPackList.Store(call, &WaitPackStr{Key: msgId, Timeout: 10000, Call: call})
 }
 
 //删除这个回调
-func (c *DTSSDKClient) deleteWaitPackFunc(call *func(model.MsgID, []byte, net.Conn, error)) {
+func (c *Client) deleteWaitPackFunc(call *func(model.MsgID, []byte, net.Conn, error)) {
 
 	value, ok := c.waitPackList.Load(call)
 	if ok {
@@ -213,7 +226,7 @@ func (c *DTSSDKClient) deleteWaitPackFunc(call *func(model.MsgID, []byte, net.Co
 }
 
 //发送消息
-func (c *DTSSDKClient) Send(msgObj interface{}) error {
+func (c *Client) Send(msgObj interface{}) error {
 	b, err := codec.Encode(msgObj)
 	if err != nil {
 		return err
@@ -226,23 +239,25 @@ func (c *DTSSDKClient) Send(msgObj interface{}) error {
 }
 
 //关闭
-func (c *DTSSDKClient) Close() {
+func (c *Client) Connected() bool {
+	return c.connected
+}
 
-	c.reconnectTicker.Stop()
-	c.reconnectTickerOver <- 0
-	close(c.reconnectTickerOver)
+func (c *Client) Close() {
+	if !c.connected {
+		return
+	}
+	c.tcpHandle(model.MsgID_DisconnectID, nil, c.sess)
 
-	c.heartBeatTicker.Stop()
 	c.heartBeatTickerOver <- 0
 	close(c.heartBeatTickerOver)
 
-	c.waitPackTimeoutTicker.Stop()
 	c.waitPackTimeoutOver <- 0
 	close(c.waitPackTimeoutOver)
 
 	if c.sess != nil {
 		_ = c.sess.Close()
 	}
-
 	c.sess = nil
+	c.connected = false
 }
