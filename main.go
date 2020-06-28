@@ -14,52 +14,47 @@ import (
 func main() {
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
-	log.Println("start")
-	client := dtssdk.NewDTSClient("192.168.0.216")
+	client := dtssdk.NewDTSClient("192.168.0.215")
 	client.CallConnected(func(addr string) {
 		log.Println(fmt.Sprintf("连接成功:%s!", addr))
-		rep1, err := client.GetDeviceID()
-		log.Println(err)
-		log.Println(rep1)
+		if rep, err := client.GetDeviceID(); err == nil {
+			if rep.Success {
+				log.Println("获取设备ID", rep.DeviceID)
+			}
+		}
 
-		rep2, err := client.GetDefenceZone(1, "")
-		log.Println(err)
-		log.Println("GetDefenceZone", rep2, err)
+		if rep2, err := client.GetDefenceZone(1, ""); err == nil {
+			log.Println("获取防区", len(rep2.Rows))
+		}
 
-		rep3, err := client.CancelSound()
-		log.Println(err)
-		log.Println("CancelSound", rep3, err)
+		if rep3, err := client.CancelSound(); err == nil {
+			log.Println("消警", rep3)
+		}
 
-		rep4, err := client.ResetAlarm()
-		log.Println(err)
-		log.Println("ResetAlarm", rep4, err)
+		if rep4, err := client.ResetAlarm(); err == nil {
+			log.Println("重置警报", rep4)
+		}
 
-		err = client.CallZoneTempNotify(func(notify *model.ZoneTempNotify, e error) {
-			log.Println("CallZoneTempNotify" + notify.DeviceID)
+		_ = client.CallZoneTempNotify(func(notify *model.ZoneTempNotify, e error) {
+			log.Println("防区温度更新")
 		})
-		log.Println("CallZoneTempNotify", err)
 
-		err = client.CallTempSignalNotify(func(notify *model.TempSignalNotify, e error) {
-			log.Println("CallTempSignalNotify" + notify.DeviceID)
+		_ = client.CallTempSignalNotify(func(notify *model.TempSignalNotify, e error) {
+			log.Println("防区温度信号更新")
 		})
-		log.Println("CallTempSignalNotify", err)
 
-		err = client.CallDeviceEventNotify(func(notify *model.DeviceEventNotify, e error) {
-			log.Println("CallDeviceEventNotify" + notify.DeviceID)
+		_ = client.CallDeviceEventNotify(func(notify *model.DeviceEventNotify, e error) {
+			log.Println("防区事件更新")
 		})
-		log.Println("CallDeviceEventNotify", err)
 
-		err = client.CallZoneAlarmNotify(func(notify *model.ZoneAlarmNotify, e error) {
-			log.Println("CallZoneAlarmNotify" + notify.DeviceID)
+		_ = client.CallZoneAlarmNotify(func(notify *model.ZoneAlarmNotify, e error) {
+			log.Println("防区报警更新")
 		})
-		log.Println("CallZoneAlarmNotify", err)
 	})
 	client.CallDisconnected(func(addr string) {
 		log.Println(fmt.Sprintf("断开连接:%s!", addr))
 	})
-	time.Sleep(time.Second * 3)
-
-	time.AfterFunc(time.Second*20, func() {
+	time.AfterFunc(time.Hour*3, func() {
 		client.Close()
 	})
 	<-ch

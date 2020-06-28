@@ -50,12 +50,17 @@ type Client struct {
 }
 
 func NewClient(o Options) *Client {
-	return &Client{Options: o}
+	return &Client{
+		Options:      o,
+		waitPackList: &sync.Map{},
+	}
 }
 
+// Deprecated: users should NewClient instead
 func NewDTSClient(ip string) *Client {
 	conn := &Client{
-		addr: fmt.Sprintf("%s:%d", ip, 17083),
+		addr:         fmt.Sprintf("%s:%d", ip, 17083),
+		waitPackList: &sync.Map{},
 	}
 	conn.init()
 	return conn
@@ -84,7 +89,7 @@ func (c *Client) connect() error {
 	}
 	conn, err := net.DialTimeout("tcp", c.addr, c.Timeout)
 	if err != nil {
-		log.Println("连接服务器失败!")
+		log.Println(c.Options.Id, "连接服务器失败!", err)
 		return err
 	}
 	if tcpConn, ok := conn.(*net.TCPConn); ok {
@@ -128,7 +133,6 @@ func (c *Client) heartBeat() {
 		select {
 		case <-c.heartBeatTicker.C:
 			if c.connected {
-				log.Println("心跳")
 				b, _ := codec.Encode(&model.HeartBeat{})
 				if _, err := c.sess.Write(b); err != nil {
 					log.Println("发送失败")
@@ -145,7 +149,6 @@ func (c *Client) heartBeat() {
 
 //超时删除回调
 func (c *Client) waitPackTimeout() {
-	c.waitPackList = new(sync.Map)
 	c.waitPackTimeoutTicker = time.NewTicker(time.Millisecond * 500)
 	c.waitPackTimeoutOver = make(chan interface{})
 	for {
@@ -248,6 +251,9 @@ func (c *Client) Close() {
 		return
 	}
 	c.tcpHandle(model.MsgID_DisconnectID, nil, c.sess)
+
+	c.reconnectTickerOver <- 0
+	close(c.reconnectTickerOver)
 
 	c.heartBeatTickerOver <- 0
 	close(c.heartBeatTickerOver)

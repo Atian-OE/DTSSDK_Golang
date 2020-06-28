@@ -1,6 +1,7 @@
 package dtssdk
 
 import (
+	"fmt"
 	"github.com/Atian-OE/DTSSDK_Golang/dtssdk/codec"
 	"github.com/Atian-OE/DTSSDK_Golang/dtssdk/model"
 	"log"
@@ -8,6 +9,71 @@ import (
 	"testing"
 	"time"
 )
+
+func connect(k, v string) {
+	time.Sleep(time.Second)
+	client := NewDTSClient(v)
+	client.Options.Id = k
+	client.CallConnected(func(addr string) {
+		time.AfterFunc(time.Minute*10, func() {
+			if k != "设备5" {
+				client.Close()
+			}
+		})
+		log.Println(fmt.Sprintf("连接成功:%s!", addr))
+		if rep, err := client.GetDeviceID(); err == nil {
+			if rep.Success {
+				log.Println(client.Options.Id, "获取设备ID", rep.DeviceID)
+			}
+		}
+
+		if rep2, err := client.GetDefenceZone(1, ""); err == nil {
+			log.Println(client.Options.Id, "获取防区", len(rep2.Rows))
+		}
+
+		if rep3, err := client.CancelSound(); err == nil {
+			log.Println("消警", rep3)
+		}
+
+		if rep4, err := client.ResetAlarm(); err == nil {
+			log.Println("重置警报", rep4)
+		}
+
+		_ = client.CallZoneTempNotify(func(notify *model.ZoneTempNotify, e error) {
+			log.Println(client.Options.Id, "温度更新")
+		})
+
+		_ = client.CallTempSignalNotify(func(notify *model.TempSignalNotify, e error) {
+			log.Println(client.Options.Id, "信号更新")
+		})
+
+		_ = client.CallDeviceEventNotify(func(notify *model.DeviceEventNotify, e error) {
+			log.Println(client.Options.Id, "事件更新")
+		})
+
+		_ = client.CallZoneAlarmNotify(func(notify *model.ZoneAlarmNotify, e error) {
+			log.Println(client.Options.Id, "报警更新")
+		})
+	})
+	client.CallDisconnected(func(addr string) {
+		log.Println(client.Options.Id, "断开连接", addr)
+		time.AfterFunc(time.Second*10, func() {
+			connect(k, v)
+		})
+	})
+}
+func TestClient2(t *testing.T) {
+	for k, v := range map[string]string{
+		"设备1": "192.168.0.215",
+		"设备2": "192.168.0.83",
+		"设备3": "192.168.0.215",
+		"设备4": "192.168.0.83",
+		"设备5": "192.168.0.215",
+	} {
+		connect(k, v)
+	}
+	select {}
+}
 
 func TestClient(t *testing.T) {
 	if c, err := NewClient(Options{
