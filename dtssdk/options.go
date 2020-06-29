@@ -11,3 +11,15 @@ type Options struct {
 	ReadBuffer  int
 	WriteBuffer int
 }
+
+func DefaultOptions(id, ip string) Options {
+	return Options{
+		Id:          id,
+		Ip:          ip,
+		Port:        17083,
+		Timeout:     time.Second * 3,
+		PingTime:    time.Minute,
+		ReadBuffer:  2048,
+		WriteBuffer: 2048,
+	}
+}

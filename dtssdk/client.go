@@ -19,12 +19,9 @@ type WaitPackStr struct {
 	Call    *func(model.MsgID, []byte, net.Conn, error)
 }
 
-// Deprecated: users should Client instead
-type DTSSDKClient Client
-
 type Client struct {
 	Options
-	sess                  *net.TCPConn
+	conn                  *net.TCPConn
 	connected             bool
 	waitPackList          *sync.Map        //等待这个包回传
 	waitPackTimeoutTicker *time.Ticker     //等待回传的回调 会在 3秒后 自动删除
@@ -52,77 +49,35 @@ type Client struct {
 func NewClient(o Options) *Client {
 	return &Client{
 		Options:      o,
+		addr:         fmt.Sprintf("%s:%d", o.Ip, o.Port),
 		waitPackList: &sync.Map{},
 	}
-}
-
-// Deprecated: users should NewClient instead
-func NewDTSClient(ip string) *Client {
-	conn := &Client{
-		addr:         fmt.Sprintf("%s:%d", ip, 17083),
-		waitPackList: &sync.Map{},
-	}
-	conn.init()
-	return conn
-}
-
-func (c *Client) init() {
-	c.reconnectTicker = time.NewTicker(time.Second * 10)
-	c.reconnectTickerOver = make(chan interface{})
-	go c.reconnect()
 }
 
 func (c *Client) Connect() (*Client, error) {
-	if c.Ip == "" {
-		return c, errors.New("ip need")
-	}
-	c.addr = fmt.Sprintf("%s:%d", c.Ip, 17083)
-	if c.Timeout == 0 {
-		c.Timeout = time.Second * 3
-	}
-	return c, c.connect()
-}
-
-func (c *Client) connect() error {
 	if c.connected {
-		return nil
+		return c, nil
 	}
-	conn, err := net.DialTimeout("tcp", c.addr, c.Timeout)
-	if err != nil {
-		log.Println(c.Options.Id, "连接服务器失败!", err)
-		return err
-	}
-	if tcpConn, ok := conn.(*net.TCPConn); ok {
-		c.sess = tcpConn
+	if conn, err := net.DialTimeout("tcp", c.addr, c.Timeout); err != nil {
+		return c, err
 	} else {
-		return errors.New("")
+		if conn2, ok := conn.(*net.TCPConn); ok {
+			c.conn = conn2
+		} else {
+			return c, errors.New("convert TCPConn error")
+		}
 	}
 
-	if err := c.sess.SetWriteBuffer(5000); err != nil {
-		return err
+	if err := c.conn.SetWriteBuffer(c.Options.WriteBuffer); err != nil {
+		return c, err
 	}
-	if err := c.sess.SetReadBuffer(5000); err != nil {
-		return err
+	if err := c.conn.SetReadBuffer(c.Options.ReadBuffer); err != nil {
+		return c, err
 	}
 	go c.waitPackTimeout()
 	go c.heartBeat()
-	go c.clientHandle(c.sess)
-	return nil
-}
-
-func (c *Client) reconnect() {
-	c.connected = false
-	c.connect()
-	for {
-		select {
-		case <-c.reconnectTicker.C:
-			c.connect()
-
-		case <-c.reconnectTickerOver:
-			c.reconnectTicker.Stop()
-			return
-		}
-	}
+	go c.clientHandle()
+	return c, nil
 }
 
 //心跳
@@ -134,7 +89,7 @@ func (c *Client) heartBeat() {
 		case <-c.heartBeatTicker.C:
 			if c.connected {
 				b, _ := codec.Encode(&model.HeartBeat{})
-				if _, err := c.sess.Write(b); err != nil {
+				if _, err := c.conn.Write(b); err != nil {
 					log.Println("发送失败")
 					c.Close()
 				}
@@ -171,20 +126,19 @@ func (c *Client) waitPackTimeout() {
 	}
 }
 
-func (c *Client) clientHandle(conn net.Conn) {
-	c.tcpHandle(model.MsgID_ConnectID, nil, conn)
+func (c *Client) clientHandle() {
+	c.tcpHandle(model.MsgID_ConnectID, nil)
 	buf := make([]byte, 1024)
 	var cache bytes.Buffer
 	for {
-		n, err := conn.Read(buf)
-		//加上上一次的缓存
+		n, err := c.conn.Read(buf)
 		if err != nil {
 			break
 		}
 
 		cache.Write(buf[:n])
 		for {
-			if c.unpack(&cache, conn) {
+			if c.unpack(&cache) {
 				break
 			}
 		}
@@ -192,7 +146,7 @@ func (c *Client) clientHandle(conn net.Conn) {
 }
 
 // true 处理完成 false 循环继续处理
-func (c *Client) unpack(cache *bytes.Buffer, conn net.Conn) bool {
+func (c *Client) unpack(cache *bytes.Buffer) bool {
 	if cache.Len() < 5 {
 		return true
 	}
@@ -204,7 +158,7 @@ func (c *Client) unpack(cache *bytes.Buffer, conn net.Conn) bool {
 	}
 
 	cmd := buf[4]
-	c.tcpHandle(model.MsgID(cmd), buf[:pkgSize+5], conn)
+	c.tcpHandle(model.MsgID(cmd), buf[:pkgSize+5])
 	cache.Reset()
 	cache.Write(buf[5+pkgSize:])
 
@@ -237,7 +191,7 @@ func (c *Client) Send(msgObj interface{}) error {
 	if !c.connected {
 		return errors.New("client not connected")
 	}
-	_, err = c.sess.Write(b)
+	_, err = c.conn.Write(b)
 	return err
 }
 
@@ -250,10 +204,7 @@ func (c *Client) Close() {
 	if !c.connected {
 		return
 	}
-	c.tcpHandle(model.MsgID_DisconnectID, nil, c.sess)
-
-	c.reconnectTickerOver <- 0
-	close(c.reconnectTickerOver)
+	c.tcpHandle(model.MsgID_DisconnectID, nil)
 
 	c.heartBeatTickerOver <- 0
 	close(c.heartBeatTickerOver)
@@ -261,9 +212,9 @@ func (c *Client) Close() {
 	c.waitPackTimeoutOver <- 0
 	close(c.waitPackTimeoutOver)
 
-	if c.sess != nil {
-		_ = c.sess.Close()
+	if c.conn != nil {
+		_ = c.conn.Close()
 	}
-	c.sess = nil
+	c.conn = nil
 	c.connected = false
 }

@@ -12,32 +12,18 @@ import (
 
 func connect(k, v string) {
 	time.Sleep(time.Second)
-	client := NewDTSClient(v)
-	client.Options.Id = k
+	client := NewClient(DefaultOptions(k, v))
+	client, err := client.Connect()
+	if err != nil {
+		log.Println("错误 ", err)
+	}
 	client.CallConnected(func(addr string) {
-		time.AfterFunc(time.Minute*10, func() {
+		time.AfterFunc(time.Minute, func() {
 			if k != "设备5" {
 				client.Close()
 			}
 		})
 		log.Println(fmt.Sprintf("连接成功:%s!", addr))
-		if rep, err := client.GetDeviceID(); err == nil {
-			if rep.Success {
-				log.Println(client.Options.Id, "获取设备ID", rep.DeviceID)
-			}
-		}
-
-		if rep2, err := client.GetDefenceZone(1, ""); err == nil {
-			log.Println(client.Options.Id, "获取防区", len(rep2.Rows))
-		}
-
-		if rep3, err := client.CancelSound(); err == nil {
-			log.Println("消警", rep3)
-		}
-
-		if rep4, err := client.ResetAlarm(); err == nil {
-			log.Println("重置警报", rep4)
-		}
 
 		_ = client.CallZoneTempNotify(func(notify *model.ZoneTempNotify, e error) {
 			log.Println(client.Options.Id, "温度更新")
@@ -45,10 +31,6 @@ func connect(k, v string) {
 
 		_ = client.CallTempSignalNotify(func(notify *model.TempSignalNotify, e error) {
 			log.Println(client.Options.Id, "信号更新")
-		})
-
-		_ = client.CallDeviceEventNotify(func(notify *model.DeviceEventNotify, e error) {
-			log.Println(client.Options.Id, "事件更新")
 		})
 
 		_ = client.CallZoneAlarmNotify(func(notify *model.ZoneAlarmNotify, e error) {
@@ -72,7 +54,7 @@ func TestClient2(t *testing.T) {
 	} {
 		connect(k, v)
 	}
-	select {}
+	time.Sleep(time.Hour)
 }
 
 func TestClient(t *testing.T) {

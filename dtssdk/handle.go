@@ -7,13 +7,12 @@ import (
 	"net"
 )
 
-func (c *Client) tcpHandle(msgId model.MsgID, data []byte, conn net.Conn) {
-
+func (c *Client) tcpHandle(msgId model.MsgID, data []byte) {
 	var isHandled bool
 	c.waitPackList.Range(func(key, value interface{}) bool {
 		v := value.(*WaitPackStr)
 		if v.Key == msgId {
-			go (*v.Call)(msgId, data[5:], conn, nil)
+			go (*v.Call)(msgId, data[5:], c.conn, nil)
 			c.waitPackList.Delete(key)
 			isHandled = true
 			return false
@@ -33,7 +32,6 @@ func (c *Client) tcpHandle(msgId model.MsgID, data []byte, conn net.Conn) {
 		}
 
 	case model.MsgID_DisconnectID:
-		c.connected = false
 		c.waitPackList.Range(func(key, value interface{}) bool {
 			v := value.(*WaitPackStr)
 			go (*v.Call)(0, nil, nil, errors.New("client disconnect"))
