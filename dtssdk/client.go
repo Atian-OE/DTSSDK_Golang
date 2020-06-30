@@ -131,6 +131,9 @@ func (c *Client) clientHandle() {
 	buf := make([]byte, 1024)
 	var cache bytes.Buffer
 	for {
+		if !c.connected || c.conn == nil {
+			break
+		}
 		n, err := c.conn.Read(buf)
 		if err != nil {
 			break
