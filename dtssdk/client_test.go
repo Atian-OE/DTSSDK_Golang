@@ -10,10 +10,14 @@ func TestDTSSDKClient(t *testing.T) {
 	for index, address := range []string{
 		"192.168.0.215",
 		"192.168.0.215",
-		"192.168.0.215",
+		"192.168.0.216",
 	} {
 		go func(index int, address string) {
 			client := NewDTSClient(address)
+			client.OnTimeout(func(s string) {
+				log.Println("连接超时:", s, index)
+			})
+
 			client.CallConnected(func(s string) {
 				log.Println("连接成功:", s, index)
 				_ = client.CallTempSignalNotify(func(notify *model.TempSignalNotify, err error) {

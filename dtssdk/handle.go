@@ -2,95 +2,96 @@ package dtssdk
 
 import (
 	"errors"
+	"fmt"
 	"github.com/Atian-OE/DTSSDK_Golang/dtssdk/model"
 	"github.com/golang/protobuf/proto"
 	"log"
 	"net"
 )
 
-func (self *DTSSDKClient) tcp_handle(msg_id model.MsgID, data []byte, conn net.Conn) {
+func (c *Client) tcp_handle(msg_id model.MsgID, data []byte, conn net.Conn) {
 
-	var is_handled bool
-	self.wait_pack_list.Range(func(key, value interface{}) bool {
+	var isHandled bool
+	c.waitPackList.Range(func(key, value interface{}) bool {
 		v := value.(*WaitPackStr)
 		if v.Key == msg_id {
 			go (*v.Call)(msg_id, data[5:], conn, nil)
-			self.wait_pack_list.Delete(key)
-			is_handled = true
+			c.waitPackList.Delete(key)
+			isHandled = true
 			return false
 		}
 		return true
 	})
-	if is_handled {
+	if isHandled {
 		return
 	}
 
 	switch msg_id {
 	case model.MsgID_ConnectID:
-		self.connected = true
-		go self.SetDeviceRequest()
-		log.Println("client connected:", self.addr)
-		if self._connected_action != nil {
-			go self._connected_action(self.addr)
+		c.connected = true
+		go c.SetDeviceRequest()
+		log.Println(fmt.Sprintf("dts客户端已经连接到服务端[ %s ]", c.addr))
+		if c.connectedAction != nil {
+			go c.connectedAction(c.addr)
 		}
 
 	case model.MsgID_DisconnectID:
-		self.connected = false
+		c.connected = false
 
-		self.wait_pack_list.Range(func(key, value interface{}) bool {
+		c.waitPackList.Range(func(key, value interface{}) bool {
 			v := value.(*WaitPackStr)
 			go (*v.Call)(0, nil, nil, errors.New("client disconnect"))
-			self.wait_pack_list.Delete(key)
+			c.waitPackList.Delete(key)
 			return true
 		})
 
-		if self._disconnected_action != nil {
-			go self._disconnected_action(self.addr)
+		if c.disconnectedAction != nil {
+			go c.disconnectedAction(c.addr)
 		}
 
 	case model.MsgID_ZoneTempNotifyID:
-		if !self._ZoneTempNotifyEnable {
+		if !c._ZoneTempNotifyEnable {
 			return
 		}
 		reply := model.ZoneTempNotify{}
 		err := proto.Unmarshal(data[5:], &reply)
-		self._ZoneTempNotify(&reply, err)
+		c._ZoneTempNotify(&reply, err)
 
 	case model.MsgID_ZoneAlarmNotifyID:
-		if !self._ZoneAlarmNotifyEnable {
+		if !c._ZoneAlarmNotifyEnable {
 			return
 		}
 		reply := model.ZoneAlarmNotify{}
 		err := proto.Unmarshal(data[5:], &reply)
-		self._ZoneAlarmNotify(&reply, err)
+		c._ZoneAlarmNotify(&reply, err)
 
 	case model.MsgID_DeviceEventNotifyID:
-		if !self._FiberStatusNotifyEnable {
+		if !c._FiberStatusNotifyEnable {
 			return
 		}
 		reply := model.DeviceEventNotify{}
 		err := proto.Unmarshal(data[5:], &reply)
-		self._FiberStatusNotify(&reply, err)
+		c._FiberStatusNotify(&reply, err)
 
 	case model.MsgID_TempSignalNotifyID:
-		if !self._TempSignalNotifyEnable {
+		if !c._TempSignalNotifyEnable {
 			return
 		}
 		reply := model.TempSignalNotify{}
 		err := proto.Unmarshal(data[5:], &reply)
-		self._TempSignalNotify(&reply, err)
+		c._TempSignalNotify(&reply, err)
 	}
 
 }
 
 //设置设备请求
-func (self *DTSSDKClient) SetDeviceRequest() (*model.SetDeviceReply, error) {
+func (c *Client) SetDeviceRequest() (*model.SetDeviceReply, error) {
 	req := &model.SetDeviceRequest{}
-	req.ZoneTempNotifyEnable = self._ZoneTempNotifyEnable
-	req.ZoneAlarmNotifyEnable = self._ZoneAlarmNotifyEnable
-	req.FiberStatusNotifyEnable = self._FiberStatusNotifyEnable
-	req.TempSignalNotifyEnable = self._TempSignalNotifyEnable
-	err := self.Send(req)
+	req.ZoneTempNotifyEnable = c._ZoneTempNotifyEnable
+	req.ZoneAlarmNotifyEnable = c._ZoneAlarmNotifyEnable
+	req.FiberStatusNotifyEnable = c._FiberStatusNotifyEnable
+	req.TempSignalNotifyEnable = c._TempSignalNotifyEnable
+	err := c.Send(req)
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +113,7 @@ func (self *DTSSDKClient) SetDeviceRequest() (*model.SetDeviceReply, error) {
 
 		wait <- ReplyStruct{&reply, err}
 	}
-	self.wait_pack(model.MsgID_SetDeviceReplyID, &call)
+	c.waitPack(model.MsgID_SetDeviceReplyID, &call)
 
 	reply := <-wait
 
@@ -120,28 +121,28 @@ func (self *DTSSDKClient) SetDeviceRequest() (*model.SetDeviceReply, error) {
 }
 
 //回调连接到服务器
-func (self *DTSSDKClient) CallConnected(call func(string)) {
-	self._connected_action = call
+func (c *Client) CallConnected(call func(string)) {
+	c.connectedAction = call
 }
 
 //回调断开连接服务器
-func (self *DTSSDKClient) CallDisconnected(call func(string)) {
-	self._disconnected_action = call
+func (c *Client) CallDisconnected(call func(string)) {
+	c.disconnectedAction = call
 }
 
 //回调分区温度更新的通知
-func (self *DTSSDKClient) CallZoneTempNotify(call func(*model.ZoneTempNotify, error)) error {
-	self._ZoneTempNotifyEnable = true
-	self._ZoneTempNotify = call
+func (c *Client) CallZoneTempNotify(call func(*model.ZoneTempNotify, error)) error {
+	c._ZoneTempNotifyEnable = true
+	c._ZoneTempNotify = call
 
 	if call == nil {
 		return errors.New("callback func is nil")
 	}
-	if !self.connected {
+	if !c.connected {
 		return errors.New("client not connected")
 	}
 
-	reply, err := self.SetDeviceRequest()
+	reply, err := c.SetDeviceRequest()
 	if err != nil {
 		return err
 	}
@@ -152,11 +153,11 @@ func (self *DTSSDKClient) CallZoneTempNotify(call func(*model.ZoneTempNotify, er
 }
 
 //禁用回调分区温度更新的通知
-func (self *DTSSDKClient) DisableZoneTempNotify() error {
-	self._ZoneTempNotifyEnable = false
-	self._ZoneTempNotify = nil
+func (c *Client) DisableZoneTempNotify() error {
+	c._ZoneTempNotifyEnable = false
+	c._ZoneTempNotify = nil
 
-	reply, err := self.SetDeviceRequest()
+	reply, err := c.SetDeviceRequest()
 	if err != nil {
 		return err
 	}
@@ -167,17 +168,17 @@ func (self *DTSSDKClient) DisableZoneTempNotify() error {
 }
 
 //回调分区警报更新的通知
-func (self *DTSSDKClient) CallZoneAlarmNotify(call func(*model.ZoneAlarmNotify, error)) error {
-	self._ZoneAlarmNotifyEnable = true
-	self._ZoneAlarmNotify = call
+func (c *Client) CallZoneAlarmNotify(call func(*model.ZoneAlarmNotify, error)) error {
+	c._ZoneAlarmNotifyEnable = true
+	c._ZoneAlarmNotify = call
 	if call == nil {
 		return errors.New("callback func is nil")
 	}
-	if !self.connected {
+	if !c.connected {
 		return errors.New("client not connected")
 	}
 
-	reply, err := self.SetDeviceRequest()
+	reply, err := c.SetDeviceRequest()
 	if err != nil {
 		return err
 	}
@@ -188,11 +189,11 @@ func (self *DTSSDKClient) CallZoneAlarmNotify(call func(*model.ZoneAlarmNotify, 
 }
 
 //禁用回调分区警报更新的通知
-func (self *DTSSDKClient) DisableZoneAlarmNotify() error {
-	self._ZoneAlarmNotifyEnable = false
-	self._ZoneAlarmNotify = nil
+func (c *Client) DisableZoneAlarmNotify() error {
+	c._ZoneAlarmNotifyEnable = false
+	c._ZoneAlarmNotify = nil
 
-	reply, err := self.SetDeviceRequest()
+	reply, err := c.SetDeviceRequest()
 	if err != nil {
 		return err
 	}
@@ -203,18 +204,18 @@ func (self *DTSSDKClient) DisableZoneAlarmNotify() error {
 }
 
 //回调光纤状态更新的通知
-func (self *DTSSDKClient) CallDeviceEventNotify(call func(*model.DeviceEventNotify, error)) error {
-	self._FiberStatusNotifyEnable = true
-	self._FiberStatusNotify = call
+func (c *Client) CallDeviceEventNotify(call func(*model.DeviceEventNotify, error)) error {
+	c._FiberStatusNotifyEnable = true
+	c._FiberStatusNotify = call
 
 	if call == nil {
 		return errors.New("callback func is nil")
 	}
-	if !self.connected {
+	if !c.connected {
 		return errors.New("client not connected")
 	}
 
-	reply, err := self.SetDeviceRequest()
+	reply, err := c.SetDeviceRequest()
 	if err != nil {
 		return err
 	}
@@ -225,10 +226,10 @@ func (self *DTSSDKClient) CallDeviceEventNotify(call func(*model.DeviceEventNoti
 }
 
 //禁用回调光纤状态更新的通知
-func (self *DTSSDKClient) DisableDeviceEventNotify() error {
-	self._FiberStatusNotifyEnable = false
-	self._FiberStatusNotify = nil
-	reply, err := self.SetDeviceRequest()
+func (c *Client) DisableDeviceEventNotify() error {
+	c._FiberStatusNotifyEnable = false
+	c._FiberStatusNotify = nil
+	reply, err := c.SetDeviceRequest()
 	if err != nil {
 		return err
 	}
@@ -239,18 +240,18 @@ func (self *DTSSDKClient) DisableDeviceEventNotify() error {
 }
 
 //回调温度信号更新的通知
-func (self *DTSSDKClient) CallTempSignalNotify(call func(*model.TempSignalNotify, error)) error {
-	self._TempSignalNotifyEnable = true
-	self._TempSignalNotify = call
+func (c *Client) CallTempSignalNotify(call func(*model.TempSignalNotify, error)) error {
+	c._TempSignalNotifyEnable = true
+	c._TempSignalNotify = call
 
 	if call == nil {
 		return errors.New("callback func is nil")
 	}
-	if !self.connected {
+	if !c.connected {
 		return errors.New("client not connected")
 	}
 
-	reply, err := self.SetDeviceRequest()
+	reply, err := c.SetDeviceRequest()
 	if err != nil {
 		return err
 	}
@@ -261,11 +262,11 @@ func (self *DTSSDKClient) CallTempSignalNotify(call func(*model.TempSignalNotify
 }
 
 //禁用回调温度信号更新的通知
-func (self *DTSSDKClient) DisableTempSignalNotify() error {
-	self._TempSignalNotifyEnable = false
-	self._TempSignalNotify = nil
+func (c *Client) DisableTempSignalNotify() error {
+	c._TempSignalNotifyEnable = false
+	c._TempSignalNotify = nil
 
-	reply, err := self.SetDeviceRequest()
+	reply, err := c.SetDeviceRequest()
 	if err != nil {
 		return err
 	}
@@ -276,12 +277,12 @@ func (self *DTSSDKClient) DisableTempSignalNotify() error {
 }
 
 //获得防区
-func (self *DTSSDKClient) GetDefenceZone(ch_id int, search string) (*model.GetDefenceZoneReply, error) {
+func (c *Client) GetDefenceZone(ch_id int, search string) (*model.GetDefenceZoneReply, error) {
 	req := &model.GetDefenceZoneRequest{}
 	req.Search = search
 	req.Channel = int32(ch_id)
 
-	err := self.Send(req)
+	err := c.Send(req)
 	if err != nil {
 		return nil, err
 	}
@@ -303,7 +304,7 @@ func (self *DTSSDKClient) GetDefenceZone(ch_id int, search string) (*model.GetDe
 		wait <- ReplyStruct{&reply, err}
 	}
 
-	self.wait_pack(model.MsgID_GetDefenceZoneReplyID, &call)
+	c.waitPack(model.MsgID_GetDefenceZoneReplyID, &call)
 
 	reply := <-wait
 
@@ -311,10 +312,10 @@ func (self *DTSSDKClient) GetDefenceZone(ch_id int, search string) (*model.GetDe
 }
 
 //获得防区
-func (self *DTSSDKClient) GetDeviceID() (*model.GetDeviceIDReply, error) {
+func (c *Client) GetDeviceID() (*model.GetDeviceIDReply, error) {
 	req := &model.GetDeviceIDRequest{}
 
-	err := self.Send(req)
+	err := c.Send(req)
 	if err != nil {
 		return nil, err
 	}
@@ -336,7 +337,7 @@ func (self *DTSSDKClient) GetDeviceID() (*model.GetDeviceIDReply, error) {
 		wait <- ReplyStruct{&reply, err}
 	}
 
-	self.wait_pack(model.MsgID_GetDeviceIDReplyID, &call)
+	c.waitPack(model.MsgID_GetDeviceIDReplyID, &call)
 
 	reply := <-wait
 
@@ -348,10 +349,10 @@ func (self *DTSSDKClient) GetDeviceID() (*model.GetDeviceIDReply, error) {
 }
 
 //消音
-func (self *DTSSDKClient) CancelSound() (*model.CancelSoundReply, error) {
+func (c *Client) CancelSound() (*model.CancelSoundReply, error) {
 	req := &model.CancelSoundRequest{}
 
-	err := self.Send(req)
+	err := c.Send(req)
 	if err != nil {
 		return nil, err
 	}
@@ -373,7 +374,7 @@ func (self *DTSSDKClient) CancelSound() (*model.CancelSoundReply, error) {
 		wait <- ReplyStruct{&reply, err}
 	}
 
-	self.wait_pack(model.MsgID_CancelSoundReplyID, &call)
+	c.waitPack(model.MsgID_CancelSoundReplyID, &call)
 
 	reply := <-wait
 
@@ -385,10 +386,10 @@ func (self *DTSSDKClient) CancelSound() (*model.CancelSoundReply, error) {
 }
 
 //消音
-func (self *DTSSDKClient) ResetAlarm() (*model.ResetAlarmReply, error) {
+func (c *Client) ResetAlarm() (*model.ResetAlarmReply, error) {
 	req := &model.ResetAlarmRequest{}
 
-	err := self.Send(req)
+	err := c.Send(req)
 	if err != nil {
 		return nil, err
 	}
@@ -410,7 +411,7 @@ func (self *DTSSDKClient) ResetAlarm() (*model.ResetAlarmReply, error) {
 		wait <- ReplyStruct{&reply, err}
 	}
 
-	self.wait_pack(model.MsgID_ResetAlarmReplyID, &call)
+	c.waitPack(model.MsgID_ResetAlarmReplyID, &call)
 
 	reply := <-wait
 
