@@ -91,9 +91,6 @@ func (c *Client) connect() {
 		return
 	}
 	c.sess = tcpConn
-	//禁用缓存
-	tcpConn.SetWriteBuffer(5000)
-	tcpConn.SetReadBuffer(5000)
 	go c.clientHandle(tcpConn)
 }
 
@@ -238,22 +235,32 @@ func (c *Client) Send(msgObj interface{}) error {
 
 //关闭
 func (c *Client) Close() {
+	select {
+	case <-c.reconnectTickerOver:
+	default:
+		c.reconnectTicker.Stop()
+		c.reconnectTickerOver <- 0
+		close(c.reconnectTickerOver)
+	}
 
-	c.reconnectTicker.Stop()
-	c.reconnectTickerOver <- 0
-	close(c.reconnectTickerOver)
+	select {
+	case <-c.heartBeatTickerOver:
+	default:
+		c.heartBeatTicker.Stop()
+		c.heartBeatTickerOver <- 0
+		close(c.heartBeatTickerOver)
+	}
 
-	c.heartBeatTicker.Stop()
-	c.heartBeatTickerOver <- 0
-	close(c.heartBeatTickerOver)
-
-	c.waitPackTimeoutTicker.Stop()
-	c.waitPackTimeoutOver <- 0
-	close(c.waitPackTimeoutOver)
+	select {
+	case <-c.waitPackTimeoutOver:
+	default:
+		c.waitPackTimeoutTicker.Stop()
+		c.waitPackTimeoutOver <- 0
+		close(c.waitPackTimeoutOver)
+	}
 
 	if c.sess != nil {
 		c.sess.Close()
 	}
-
 	c.sess = nil
 }
