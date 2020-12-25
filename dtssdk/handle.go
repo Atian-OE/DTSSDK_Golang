@@ -2,17 +2,20 @@ package dtssdk
 
 import (
 	"errors"
+	"fmt"
 	"github.com/Atian-OE/DTSSDK_Golang/dtssdk/model"
 	"github.com/golang/protobuf/proto"
+	"log"
 	"net"
 )
 
-func (c *Client) tcpHandle(msgId model.MsgID, data []byte) {
+func (c *Client) tcp_handle(msg_id model.MsgID, data []byte, conn net.Conn) {
+
 	var isHandled bool
 	c.waitPackList.Range(func(key, value interface{}) bool {
 		v := value.(*WaitPackStr)
-		if v.Key == msgId {
-			go (*v.Call)(msgId, data[5:], c.conn, nil)
+		if v.Key == msg_id {
+			go (*v.Call)(msg_id, data[5:], conn, nil)
 			c.waitPackList.Delete(key)
 			isHandled = true
 			return false
@@ -23,15 +26,18 @@ func (c *Client) tcpHandle(msgId model.MsgID, data []byte) {
 		return
 	}
 
-	switch msgId {
+	switch msg_id {
 	case model.MsgID_ConnectID:
 		c.connected = true
 		go c.SetDeviceRequest()
+		log.Println(fmt.Sprintf("dts客户端已经连接到服务端[ %s ]", c.addr))
 		if c.connectedAction != nil {
 			go c.connectedAction(c.addr)
 		}
 
 	case model.MsgID_DisconnectID:
+		c.connected = false
+
 		c.waitPackList.Range(func(key, value interface{}) bool {
 			v := value.(*WaitPackStr)
 			go (*v.Call)(0, nil, nil, errors.New("client disconnect"))
@@ -97,7 +103,7 @@ func (c *Client) SetDeviceRequest() (*model.SetDeviceReply, error) {
 
 	wait := make(chan ReplyStruct)
 
-	call := func(msgId model.MsgID, data []byte, conn net.Conn, err error) {
+	call := func(msg_id model.MsgID, data []byte, conn net.Conn, err error) {
 		if err != nil {
 			wait <- ReplyStruct{nil, err}
 			return
@@ -115,15 +121,13 @@ func (c *Client) SetDeviceRequest() (*model.SetDeviceReply, error) {
 }
 
 //回调连接到服务器
-func (c *Client) CallConnected(call func(string)) *Client {
+func (c *Client) CallConnected(call func(string)) {
 	c.connectedAction = call
-	return c
 }
 
 //回调断开连接服务器
-func (c *Client) CallDisconnected(call func(string)) *Client {
+func (c *Client) CallDisconnected(call func(string)) {
 	c.disconnectedAction = call
-	return c
 }
 
 //回调分区温度更新的通知
@@ -273,10 +277,10 @@ func (c *Client) DisableTempSignalNotify() error {
 }
 
 //获得防区
-func (c *Client) GetDefenceZone(chId int, search string) (*model.GetDefenceZoneReply, error) {
+func (c *Client) GetDefenceZone(ch_id int, search string) (*model.GetDefenceZoneReply, error) {
 	req := &model.GetDefenceZoneRequest{}
 	req.Search = search
-	req.Channel = int32(chId)
+	req.Channel = int32(ch_id)
 
 	err := c.Send(req)
 	if err != nil {
@@ -290,7 +294,7 @@ func (c *Client) GetDefenceZone(chId int, search string) (*model.GetDefenceZoneR
 
 	wait := make(chan ReplyStruct)
 
-	call := func(msgId model.MsgID, data []byte, conn net.Conn, err error) {
+	call := func(msg_id model.MsgID, data []byte, conn net.Conn, err error) {
 		if err != nil {
 			wait <- ReplyStruct{nil, err}
 			return
@@ -323,7 +327,7 @@ func (c *Client) GetDeviceID() (*model.GetDeviceIDReply, error) {
 
 	wait := make(chan ReplyStruct)
 
-	call := func(msgId model.MsgID, data []byte, conn net.Conn, err error) {
+	call := func(msg_id model.MsgID, data []byte, conn net.Conn, err error) {
 		if err != nil {
 			wait <- ReplyStruct{nil, err}
 			return
@@ -336,6 +340,10 @@ func (c *Client) GetDeviceID() (*model.GetDeviceIDReply, error) {
 	c.waitPack(model.MsgID_GetDeviceIDReplyID, &call)
 
 	reply := <-wait
+
+	if err != nil {
+		return nil, err
+	}
 
 	return reply.rep, reply.err
 }
@@ -356,7 +364,7 @@ func (c *Client) CancelSound() (*model.CancelSoundReply, error) {
 
 	wait := make(chan ReplyStruct)
 
-	call := func(msgId model.MsgID, data []byte, conn net.Conn, err error) {
+	call := func(msg_id model.MsgID, data []byte, conn net.Conn, err error) {
 		if err != nil {
 			wait <- ReplyStruct{nil, err}
 			return
@@ -369,6 +377,10 @@ func (c *Client) CancelSound() (*model.CancelSoundReply, error) {
 	c.waitPack(model.MsgID_CancelSoundReplyID, &call)
 
 	reply := <-wait
+
+	if err != nil {
+		return nil, err
+	}
 
 	return reply.rep, reply.err
 }
@@ -389,7 +401,7 @@ func (c *Client) ResetAlarm() (*model.ResetAlarmReply, error) {
 
 	wait := make(chan ReplyStruct)
 
-	call := func(msgId model.MsgID, data []byte, conn net.Conn, err error) {
+	call := func(msg_id model.MsgID, data []byte, conn net.Conn, err error) {
 		if err != nil {
 			wait <- ReplyStruct{nil, err}
 			return
@@ -402,6 +414,10 @@ func (c *Client) ResetAlarm() (*model.ResetAlarmReply, error) {
 	c.waitPack(model.MsgID_ResetAlarmReplyID, &call)
 
 	reply := <-wait
+
+	if err != nil {
+		return nil, err
+	}
 
 	return reply.rep, reply.err
 }

@@ -20,8 +20,7 @@ type WaitPackStr struct {
 }
 
 type Client struct {
-	Options
-	conn                  *net.TCPConn
+	sess                  *net.TCPConn
 	connected             bool
 	waitPackList          *sync.Map        //等待这个包回传
 	waitPackTimeoutTicker *time.Ticker     //等待回传的回调 会在 3秒后 自动删除
@@ -44,72 +43,96 @@ type Client struct {
 	_FiberStatusNotify       func(*model.DeviceEventNotify, error) //设备状态通知
 	_TempSignalNotifyEnable  bool                                  //接收设备温度信号的通知
 	_TempSignalNotify        func(*model.TempSignalNotify, error)  //设备状态通知
+
+	onTimeout func(string)
 }
 
-func NewClient(o Options) *Client {
-	return &Client{
-		Options:      o,
-		addr:         fmt.Sprintf("%s:%d", o.Ip, o.Port),
-		waitPackList: &sync.Map{},
-	}
+func NewDTSClient(addr string) *Client {
+	conn := &Client{}
+	conn.init(addr)
+	return conn
 }
 
-func (c *Client) Connect() (*Client, error) {
-	if c.connected {
-		return c, nil
-	}
-	if conn, err := net.DialTimeout("tcp", c.addr, c.Timeout); err != nil {
-		return c, err
-	} else {
-		if conn2, ok := conn.(*net.TCPConn); ok {
-			c.conn = conn2
-		} else {
-			return c, errors.New("convert TCPConn error")
-		}
-	}
+func (c *Client) OnTimeout(f func(string)) {
+	c.onTimeout = f
+}
 
-	if err := c.conn.SetWriteBuffer(c.Options.WriteBuffer); err != nil {
-		return c, err
-	}
-	if err := c.conn.SetReadBuffer(c.Options.ReadBuffer); err != nil {
-		return c, err
-	}
+func (c *Client) init(addr string) {
+	c.addr = addr
+	c.waitPackList = new(sync.Map)
+
+	c.waitPackTimeoutTicker = time.NewTicker(time.Millisecond * 500)
+	c.waitPackTimeoutOver = make(chan interface{})
+	c.heartBeatTicker = time.NewTicker(time.Second * 5)
+	c.heartBeatTickerOver = make(chan interface{})
+	c.reconnectTicker = time.NewTicker(time.Second * 10)
+	c.reconnectTickerOver = make(chan interface{})
+
 	go c.waitPackTimeout()
 	go c.heartBeat()
-	go c.clientHandle()
-	return c, nil
+	go c.reconnect()
+}
+
+func (c *Client) connect() {
+	if c.connected {
+		return
+	}
+	log.Println(fmt.Sprintf("dts客户端正在连接服务端[ %s ]", c.addr))
+	conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:17083", c.addr), time.Second*3)
+	if err != nil {
+		if c.onTimeout != nil {
+			c.onTimeout(c.addr)
+		}
+		return
+	}
+	tcpConn, ok := conn.(*net.TCPConn)
+	if !ok {
+		//fmt.Println("连接服务器失败!")
+		return
+	}
+	c.sess = tcpConn
+	go c.clientHandle(tcpConn)
+}
+
+func (c *Client) reconnect() {
+	c.connected = false
+	c.connect()
+
+	for {
+		select {
+		case <-c.reconnectTicker.C:
+			c.connect()
+
+		case <-c.reconnectTickerOver:
+			return
+		}
+	}
 }
 
 //心跳
 func (c *Client) heartBeat() {
-	c.heartBeatTicker = time.NewTicker(time.Second * 5)
-	c.heartBeatTickerOver = make(chan interface{})
 	for {
 		select {
 		case <-c.heartBeatTicker.C:
 			if c.connected {
 				b, _ := codec.Encode(&model.HeartBeat{})
-				if _, err := c.conn.Write(b); err != nil {
-					log.Println("发送失败")
-					c.Close()
-				}
+				c.sess.Write(b)
 			}
 
 		case <-c.heartBeatTickerOver:
-			c.heartBeatTicker.Stop()
 			return
+
 		}
 	}
 }
 
 //超时删除回调
 func (c *Client) waitPackTimeout() {
-	c.waitPackTimeoutTicker = time.NewTicker(time.Millisecond * 500)
-	c.waitPackTimeoutOver = make(chan interface{})
 	for {
 		select {
 		case <-c.waitPackTimeoutTicker.C:
 			c.waitPackList.Range(func(key, value interface{}) bool {
+
 				v := value.(*WaitPackStr)
 				v.Timeout -= 500
 				if v.Timeout <= 0 {
@@ -120,36 +143,45 @@ func (c *Client) waitPackTimeout() {
 			})
 
 		case <-c.waitPackTimeoutOver:
-			c.waitPackTimeoutTicker.Stop()
 			return
+
 		}
 	}
 }
 
-func (c *Client) clientHandle() {
-	c.tcpHandle(model.MsgID_ConnectID, nil)
+func (c *Client) clientHandle(conn net.Conn) {
+	c.tcp_handle(model.MsgID_ConnectID, nil, conn)
+	defer func() {
+		if conn != nil {
+			c.tcp_handle(model.MsgID_DisconnectID, nil, conn)
+			conn.Close()
+		}
+	}()
+
 	buf := make([]byte, 1024)
 	var cache bytes.Buffer
 	for {
-		if !c.connected || c.conn == nil {
-			break
-		}
-		n, err := c.conn.Read(buf)
+		//cache_index:=0
+		n, err := conn.Read(buf)
+		//加上上一次的缓存
+		//n=buf_index+n
 		if err != nil {
+			c.connected = false
 			break
 		}
 
 		cache.Write(buf[:n])
 		for {
-			if c.unpack(&cache) {
+			if c.unpack(&cache, conn) {
 				break
 			}
 		}
 	}
+
 }
 
 // true 处理完成 false 循环继续处理
-func (c *Client) unpack(cache *bytes.Buffer) bool {
+func (c *Client) unpack(cache *bytes.Buffer, conn net.Conn) bool {
 	if cache.Len() < 5 {
 		return true
 	}
@@ -161,7 +193,7 @@ func (c *Client) unpack(cache *bytes.Buffer) bool {
 	}
 
 	cmd := buf[4]
-	c.tcpHandle(model.MsgID(cmd), buf[:pkgSize+5])
+	c.tcp_handle(model.MsgID(cmd), buf[:pkgSize+5], conn)
 	cache.Reset()
 	cache.Write(buf[5+pkgSize:])
 
@@ -194,30 +226,41 @@ func (c *Client) Send(msgObj interface{}) error {
 	if !c.connected {
 		return errors.New("client not connected")
 	}
-	_, err = c.conn.Write(b)
+	_, err = c.sess.Write(b)
+	if err != nil {
+		c.connected = false
+	}
 	return err
 }
 
 //关闭
-func (c *Client) Connected() bool {
-	return c.connected
-}
-
 func (c *Client) Close() {
-	if !c.connected {
-		return
+	select {
+	case <-c.reconnectTickerOver:
+	default:
+		c.reconnectTicker.Stop()
+		c.reconnectTickerOver <- 0
+		close(c.reconnectTickerOver)
 	}
-	c.tcpHandle(model.MsgID_DisconnectID, nil)
 
-	c.heartBeatTickerOver <- 0
-	close(c.heartBeatTickerOver)
-
-	c.waitPackTimeoutOver <- 0
-	close(c.waitPackTimeoutOver)
-
-	if c.conn != nil {
-		_ = c.conn.Close()
+	select {
+	case <-c.heartBeatTickerOver:
+	default:
+		c.heartBeatTicker.Stop()
+		c.heartBeatTickerOver <- 0
+		close(c.heartBeatTickerOver)
 	}
-	c.conn = nil
-	c.connected = false
+
+	select {
+	case <-c.waitPackTimeoutOver:
+	default:
+		c.waitPackTimeoutTicker.Stop()
+		c.waitPackTimeoutOver <- 0
+		close(c.waitPackTimeoutOver)
+	}
+
+	if c.sess != nil {
+		c.sess.Close()
+	}
+	c.sess = nil
 }

@@ -68,22 +68,22 @@ func IntToBytes(n int64, b byte) ([]byte, error) {
 	case 1:
 		tmp := int8(n)
 		bytesBuffer := bytes.NewBuffer([]byte{})
-		_ = binary.Write(bytesBuffer, binary.BigEndian, &tmp)
+		binary.Write(bytesBuffer, binary.BigEndian, &tmp)
 		return bytesBuffer.Bytes(), nil
 	case 2:
 		tmp := int16(n)
 		bytesBuffer := bytes.NewBuffer([]byte{})
-		_ = binary.Write(bytesBuffer, binary.BigEndian, &tmp)
+		binary.Write(bytesBuffer, binary.BigEndian, &tmp)
 		return bytesBuffer.Bytes(), nil
 	case 3, 4:
 		tmp := int32(n)
 		bytesBuffer := bytes.NewBuffer([]byte{})
-		_ = binary.Write(bytesBuffer, binary.BigEndian, &tmp)
+		binary.Write(bytesBuffer, binary.BigEndian, &tmp)
 		return bytesBuffer.Bytes(), nil
 	case 5, 6, 7, 8:
 		tmp := int64(n)
 		bytesBuffer := bytes.NewBuffer([]byte{})
-		_ = binary.Write(bytesBuffer, binary.BigEndian, &tmp)
+		binary.Write(bytesBuffer, binary.BigEndian, &tmp)
 		return bytesBuffer.Bytes(), nil
 	}
 	return nil, fmt.Errorf("IntToBytes b param is invaild")
