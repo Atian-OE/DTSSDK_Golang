@@ -5,168 +5,168 @@ syntax = "proto3";
 package model;
 
 
-enum MsgID{
-    ConnectID=0;
-    DisconnectID=1;
-    GetDefenceZoneRequestID=2;
-    GetDefenceZoneReplyID=3;
-    SetDeviceRequestID=4;
-    SetDeviceReplyID=5;
-    ZoneTempNotifyID=6;
-    ZoneAlarmNotifyID=7;
-    DeviceEventNotifyID=8;
-    TempSignalNotifyID=9;
-    GetDeviceIDRequestID=10;
-    GetDeviceIDReplyID=11;
-    CancelSoundRequestID=12;
-    CancelSoundReplyID=13;
-    ResetAlarmRequestID=14;
-    ResetAlarmReplyID=15;
+enum MsgID {
+    ConnectID = 0;
+    DisconnectID = 1;
+    GetDefenceZoneRequestID = 2;
+    GetDefenceZoneReplyID = 3;
+    SetDeviceRequestID = 4;
+    SetDeviceReplyID = 5;
+    ZoneTempNotifyID = 6;
+    ZoneAlarmNotifyID = 7;
+    DeviceEventNotifyID = 8;
+    TempSignalNotifyID = 9;
+    GetDeviceIDRequestID = 10;
+    GetDeviceIDReplyID = 11;
+    CancelSoundRequestID = 12;
+    CancelSoundReplyID = 13;
+    ResetAlarmRequestID = 14;
+    ResetAlarmReplyID = 15;
 
-    HeartBeatID=250;
-}
-
-
-
-//防区状态
-enum DefenceAreaState{
-    Normal=0;//正常
-    WarnDiffer=1;//温差预警
-    WarnUp=2;//温升预警
-    WarnTemp=3;//定温预警
-    AlarmDiffer=4;//温差警报
-    AlarmUp=5;//温升警报
-    AlarmTemp=6;//定温警报
+    HeartBeatID = 250;
 }
 
 //防区状态
-enum FiberState{
-    SSTATEISOK=0;//光纤正常
-    SSTATUSUNFIN=1;//光纤拔出
-    SSTATUSFIN=2;//光纤插入
-    SSTATUSBRK=3;//光纤断裂
-    SSTATUSTLO=4;//光纤过长
-    SSTATUSLTM=5;//光纤损耗过多
+enum DefenceAreaState {
+    Normal = 0; //正常
+    WarnDiffer = 1; //温差预警
+    WarnUp = 2; //温升预警
+    WarnTemp = 3; //定温预警
+    AlarmDiffer = 4; //温差警报
+    AlarmUp = 5; //温升警报
+    AlarmTemp = 6; //定温警报
+    WarnLowTemp = 7; //低温预警
+    AlarmLowTemp = 8; //低温报警
+}
+
+//防区状态
+enum FiberState {
+    SSTATEISOK = 0; //光纤正常
+    SSTATUSUNFIN = 1; //光纤拔出
+    SSTATUSFIN = 2; //光纤插入
+    SSTATUSBRK = 3; //光纤断裂
+    SSTATUSTLO = 4; //光纤过长
+    SSTATUSLTM = 5; //光纤损耗过多
 }
 
 //设备
-message DeviceEvent{
-    int32 ChannelID=1;
-    string DeviceID=2;
-    int64 Timestamp=3;
-    FiberState EventType=4;
-    float ChannelLength=5;
+message DeviceEvent {
+    int32 ChannelID = 1;
+    string DeviceID = 2;
+    int64 Timestamp = 3;
+    FiberState EventType = 4;
+    float ChannelLength = 5;
 }
 
 //防区
-message DefenceZone{
-    int32 ID=1;
-    int32 ChannelID=2;
-    string ZoneName=3;
-    float Start=4;
-    float Finish=5;
-    string Tag=6;
-    DefenceAreaState AlarmType=7;
-    float AlarmLoc=8;
-    float MaxTemperature=9;
-    float MinTemperature=10;
-    float AverageTemperature=11;
+message DefenceZone {
+    int32 ID = 1;
+    int32 ChannelID = 2;
+    string ZoneName = 3;
+    float Start = 4;
+    float Finish = 5;
+    string Tag = 6;
+    DefenceAreaState AlarmType = 7;
+    float AlarmLoc = 8;
+    float MaxTemperature = 9;
+    float MinTemperature = 10;
+    float AverageTemperature = 11;
 }
 
 //设置设备请求
-message SetDeviceRequest{
-   bool ZoneTempNotifyEnable =1;
-   bool	ZoneAlarmNotifyEnable =2;
-   bool	FiberStatusNotifyEnable =3;
-   bool	TempSignalNotifyEnable =4;
+message SetDeviceRequest {
+    bool ZoneTempNotifyEnable = 1;
+    bool ZoneAlarmNotifyEnable = 2;
+    bool FiberStatusNotifyEnable = 3;
+    bool TempSignalNotifyEnable = 4;
 }
 
 //设置设备回执
-message SetDeviceReply{
-   bool Success=1;
-   string ErrMsg=2;
+message SetDeviceReply {
+    bool Success = 1;
+    string ErrMsg = 2;
 }
 
 //获取所有防区
-message GetDefenceZoneRequest{
-    int32 Channel=1;
-    string Search=2;
+message GetDefenceZoneRequest {
+    int32 Channel = 1;
+    string Search = 2;
 }
 
 //获取所有防区
-message GetDefenceZoneReply{
-  bool Success=1;
-  string ErrMsg=2;
-  repeated DefenceZone Rows=3;
+message GetDefenceZoneReply {
+    bool Success = 1;
+    string ErrMsg = 2;
+    repeated DefenceZone Rows = 3;
 }
 
 //获取设备id 请求
-message GetDeviceIDRequest{
+message GetDeviceIDRequest {
 
 }
 
 //获取设备id 回执
-message GetDeviceIDReply{
-  bool Success=1;
-  string ErrMsg=2;
-  string DeviceID=3;
+message GetDeviceIDReply {
+    bool Success = 1;
+    string ErrMsg = 2;
+    string DeviceID = 3;
 }
 
 //消音请求
-message CancelSoundRequest{
+message CancelSoundRequest {
 
 }
 
 //消音回执
-message CancelSoundReply{
-   bool Success=1;
-   string ErrMsg=2;
+message CancelSoundReply {
+    bool Success = 1;
+    string ErrMsg = 2;
 }
 
 //重置警报请求
-message ResetAlarmRequest{
+message ResetAlarmRequest {
 
 }
 
 //重置警报回执
-message ResetAlarmReply{
-   bool Success=1;
-   string ErrMsg=2;
+message ResetAlarmReply {
+    bool Success = 1;
+    string ErrMsg = 2;
 }
 
 //防区温度，广播
-message ZoneTempNotify{
-  string DeviceID=1;
-  int64 Timestamp=2;
-  repeated DefenceZone Zones=3;
+message ZoneTempNotify {
+    string DeviceID = 1;
+    int64 Timestamp = 2;
+    repeated DefenceZone Zones = 3;
 }
 
 //防区警报 广播
-message ZoneAlarmNotify{
-  string DeviceID=1;
-  int64 Timestamp=2;
-  repeated DefenceZone Zones=3;
+message ZoneAlarmNotify {
+    string DeviceID = 1;
+    int64 Timestamp = 2;
+    repeated DefenceZone Zones = 3;
 }
 
 //设备状态， 广播
-message DeviceEventNotify{
-   int32 ChannelID=1;
-   string DeviceID=2;
-   int64 Timestamp=3;
-   FiberState EventType=4;
-   float ChannelLength=5;
+message DeviceEventNotify {
+    int32 ChannelID = 1;
+    string DeviceID = 2;
+    int64 Timestamp = 3;
+    FiberState EventType = 4;
+    float ChannelLength = 5;
 }
 
 //温度信号， 广播
-message TempSignalNotify{
-  string DeviceID=1;
-  int32 ChannelID=2;
-  float RealLength=3;
-  repeated float Signal=4;
-  int64 Timestamp=5;
+message TempSignalNotify {
+    string DeviceID = 1;
+    int32 ChannelID = 2;
+    float RealLength = 3;
+    repeated float Signal = 4;
+    int64 Timestamp = 5;
 }
 
 //心跳
-message HeartBeat{
+message HeartBeat {
 
 }
