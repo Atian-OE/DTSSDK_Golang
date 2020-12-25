@@ -9,13 +9,13 @@ import (
 	"net"
 )
 
-func (c *Client) tcp_handle(msg_id model.MsgID, data []byte, conn net.Conn) {
+func (c *Client) tcpHandle(msgId model.MsgID, data []byte, conn net.Conn) {
 
 	var isHandled bool
 	c.waitPackList.Range(func(key, value interface{}) bool {
 		v := value.(*WaitPackStr)
-		if v.Key == msg_id {
-			go (*v.Call)(msg_id, data[5:], conn, nil)
+		if v.Key == msgId {
+			go (*v.Call)(msgId, data[5:], conn, nil)
 			c.waitPackList.Delete(key)
 			isHandled = true
 			return false
@@ -26,7 +26,7 @@ func (c *Client) tcp_handle(msg_id model.MsgID, data []byte, conn net.Conn) {
 		return
 	}
 
-	switch msg_id {
+	switch msgId {
 	case model.MsgID_ConnectID:
 		c.connected = true
 		go c.SetDeviceRequest()

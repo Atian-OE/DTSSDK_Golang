@@ -150,10 +150,10 @@ func (c *Client) waitPackTimeout() {
 }
 
 func (c *Client) clientHandle(conn net.Conn) {
-	c.tcp_handle(model.MsgID_ConnectID, nil, conn)
+	c.tcpHandle(model.MsgID_ConnectID, nil, conn)
 	defer func() {
 		if conn != nil {
-			c.tcp_handle(model.MsgID_DisconnectID, nil, conn)
+			c.tcpHandle(model.MsgID_DisconnectID, nil, conn)
 			conn.Close()
 		}
 	}()
@@ -193,7 +193,7 @@ func (c *Client) unpack(cache *bytes.Buffer, conn net.Conn) bool {
 	}
 
 	cmd := buf[4]
-	c.tcp_handle(model.MsgID(cmd), buf[:pkgSize+5], conn)
+	c.tcpHandle(model.MsgID(cmd), buf[:pkgSize+5], conn)
 	cache.Reset()
 	cache.Write(buf[5+pkgSize:])
 
