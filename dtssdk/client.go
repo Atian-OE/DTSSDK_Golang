@@ -91,6 +91,8 @@ func (c *Client) connect() {
 		return
 	}
 	c.sess = tcpConn
+	_ = c.sess.SetWriteBuffer(5000)
+	_ = c.sess.SetReadBuffer(5000)
 	go c.clientHandle(tcpConn)
 }
 
@@ -161,6 +163,9 @@ func (c *Client) clientHandle(conn net.Conn) {
 	buf := make([]byte, 1024)
 	var cache bytes.Buffer
 	for {
+		if !c.connected || c.sess == nil {
+			break
+		}
 		//cache_index:=0
 		n, err := conn.Read(buf)
 		//加上上一次的缓存
