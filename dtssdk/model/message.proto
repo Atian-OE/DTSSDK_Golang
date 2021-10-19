@@ -42,6 +42,7 @@ enum DefenceAreaState{
     AlarmTemp=6;//定温警报
     WarnLowTemp=7;//低温预警
     AlarmLowTemp=8;//低温警报
+
 }
 
 //防区状态
