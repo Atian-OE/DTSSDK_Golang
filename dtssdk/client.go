@@ -47,6 +47,8 @@ type DTSSDKClient struct{
 	_FiberStatusNotify       func(*model.DeviceEventNotify,error) //设备状态通知
 	_TempSignalNotifyEnable  bool                                 //接收设备温度信号的通知
 	_TempSignalNotify        func(*model.TempSignalNotify,error)  //设备状态通知
+	_ButtonNotifyEnable  bool                                 //接收设备温度信号的通知
+	_ButtonNotify        func(*model.ButtonNotify,error)  //按钮通知
 }
 
 func NewDTSClient(addr string) *DTSSDKClient {

@@ -6,6 +6,7 @@ import (
 	"github.com/Atian-OE/DTSSDK_Golang/dtssdk/model"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 )
@@ -18,7 +19,7 @@ fmt.Println(time.Now())
 	signal.Notify(ch, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	fmt.Println("start")
 
-	client:= dtssdk.NewDTSClient("192.168.0.37")
+	client:= dtssdk.NewDTSClient("192.168.0.86")
 
 	client.CallConnected(func(addr string) {
 		fmt.Println(fmt.Sprintf("连接成功:%s!",addr))
@@ -52,7 +53,7 @@ fmt.Println(time.Now())
 
 
 	err= client.CallTempSignalNotify(func(notify *model.TempSignalNotify, e error) {
-		fmt.Println("CallTempSignalNotify"+notify.DeviceID)
+		fmt.Println("CallTempSignalNotify"+notify.DeviceID+" "+ strconv.Itoa( len(notify.Signal)))
 	})
 	fmt.Println("CallTempSignalNotify",err)
 
@@ -66,6 +67,10 @@ fmt.Println(time.Now())
 	})
 	fmt.Println("CallZoneAlarmNotify",err)
 
+	err= client.CallButtonNotify(func(notify *model.ButtonNotify, e error) {
+		fmt.Println("CallButtonNotify"+notify.DeviceID)
+	})
+	fmt.Println("CallButtonNotify",err)
 
 
 	<-ch

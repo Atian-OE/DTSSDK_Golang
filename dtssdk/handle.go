@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/Atian-OE/DTSSDK_Golang/dtssdk/model"
 	"github.com/golang/protobuf/proto"
-	"log"
 	"net"
 )
 
@@ -21,7 +20,7 @@ func (self*DTSSDKClient)tcp_handle(msg_id model.MsgID, data []byte,conn net.Conn
 		}
 		return true
 	})
-	log.Print(model.MsgID(msg_id),"____")
+	//log.Print(model.MsgID(msg_id),"____")
 	if is_handled {
 		return
 	}
@@ -81,6 +80,14 @@ func (self*DTSSDKClient)tcp_handle(msg_id model.MsgID, data []byte,conn net.Conn
 		reply:=model.TempSignalNotify{}
 		err:=proto.Unmarshal(data[5:], &reply)
 		self._TempSignalNotify(&reply,err)
+
+	case model.MsgID_ButtonNotifyID:
+		if(!self._ButtonNotifyEnable){
+			return
+		}
+		reply:=model.ButtonNotify{}
+		err:=proto.Unmarshal(data[5:], &reply)
+		self._ButtonNotify(&reply,err)
 	}
 
 }
@@ -93,6 +100,7 @@ func (self*DTSSDKClient)SetDeviceRequest() (*model.SetDeviceReply,error) {
 	req.ZoneAlarmNotifyEnable=self._ZoneAlarmNotifyEnable
 	req.FiberStatusNotifyEnable=self._FiberStatusNotifyEnable
 	req.TempSignalNotifyEnable=self._TempSignalNotifyEnable
+	req.ButtonNotifyEnable=self._ButtonNotifyEnable
 	err:=self.Send(req)
 	if(err!=nil){
 		return nil,err
@@ -248,6 +256,44 @@ func (self*DTSSDKClient)DisableDeviceEventNotify() error {
 func (self*DTSSDKClient)CallTempSignalNotify(call func(*model.TempSignalNotify,error)) error {
 	self._TempSignalNotifyEnable =true
 	self._TempSignalNotify =call
+
+	if(call==nil){
+		return errors.New("callback func is nil")
+	}
+	if(!self.connected){
+		return errors.New("client not connected")
+	}
+
+
+	reply,err:=self.SetDeviceRequest()
+	if(err!=nil){
+		return err
+	}
+	if(!reply.Success){
+		return errors.New(reply.ErrMsg)
+	}
+	return nil
+}
+
+//禁用回调温度信号更新的通知
+func (self*DTSSDKClient)DisableButtonNotify() error {
+	self._ButtonNotifyEnable =false
+	self._ButtonNotify =nil
+
+	reply,err:=self.SetDeviceRequest()
+	if(err!=nil){
+		return err
+	}
+	if(!reply.Success){
+		return errors.New(reply.ErrMsg)
+	}
+	return nil
+}
+
+//回调按钮触发的通知
+func (self*DTSSDKClient)CallButtonNotify(call func(*model.ButtonNotify,error)) error {
+	self._ButtonNotifyEnable =true
+	self._ButtonNotify =call
 
 	if(call==nil){
 		return errors.New("callback func is nil")

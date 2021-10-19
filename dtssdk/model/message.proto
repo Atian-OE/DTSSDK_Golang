@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 //protoc --go_out=. dtssdk/model/message.proto
+option go_package ="./dtssdk/model;model";
 
 package model;
 
@@ -22,6 +23,8 @@ enum MsgID{
     CancelSoundReplyID=13;
     ResetAlarmRequestID=14;
     ResetAlarmReplyID=15;
+    ButtonNotifyID=16;
+
 
     HeartBeatID=250;
 }
@@ -37,6 +40,8 @@ enum DefenceAreaState{
     AlarmDiffer=4;//温差警报
     AlarmUp=5;//温升警报
     AlarmTemp=6;//定温警报
+    WarnLowTemp=7;//低温预警
+    AlarmLowTemp=8;//低温警报
 }
 
 //防区状态
@@ -75,16 +80,17 @@ message DefenceZone{
 
 //设置设备请求
 message SetDeviceRequest{
-   bool ZoneTempNotifyEnable =1;
-   bool	ZoneAlarmNotifyEnable =2;
-   bool	FiberStatusNotifyEnable =3;
-   bool	TempSignalNotifyEnable =4;
+    bool    ZoneTempNotifyEnable =1;
+    bool	ZoneAlarmNotifyEnable =2;
+    bool	FiberStatusNotifyEnable =3;
+    bool	TempSignalNotifyEnable =4;
+    bool	ButtonNotifyEnable =5;
 }
 
 //设置设备回执
 message SetDeviceReply{
-   bool Success=1;
-   string ErrMsg=2;
+    bool Success=1;
+    string ErrMsg=2;
 }
 
 //获取所有防区
@@ -95,9 +101,9 @@ message GetDefenceZoneRequest{
 
 //获取所有防区
 message GetDefenceZoneReply{
-  bool Success=1;
-  string ErrMsg=2;
-  repeated DefenceZone Rows=3;
+    bool Success=1;
+    string ErrMsg=2;
+    repeated DefenceZone Rows=3;
 }
 
 //获取设备id 请求
@@ -107,9 +113,9 @@ message GetDeviceIDRequest{
 
 //获取设备id 回执
 message GetDeviceIDReply{
-  bool Success=1;
-  string ErrMsg=2;
-  string DeviceID=3;
+    bool Success=1;
+    string ErrMsg=2;
+    string DeviceID=3;
 }
 
 //消音请求
@@ -119,8 +125,8 @@ message CancelSoundRequest{
 
 //消音回执
 message CancelSoundReply{
-   bool Success=1;
-   string ErrMsg=2;
+    bool Success=1;
+    string ErrMsg=2;
 }
 
 //重置警报请求
@@ -130,40 +136,48 @@ message ResetAlarmRequest{
 
 //重置警报回执
 message ResetAlarmReply{
-   bool Success=1;
-   string ErrMsg=2;
+    bool Success=1;
+    string ErrMsg=2;
 }
 
 //防区温度，广播
 message ZoneTempNotify{
-  string DeviceID=1;
-  int64 Timestamp=2;
-  repeated DefenceZone Zones=3;
+    string DeviceID=1;
+    int64 Timestamp=2;
+    repeated DefenceZone Zones=3;
 }
 
 //防区警报 广播
 message ZoneAlarmNotify{
-  string DeviceID=1;
-  int64 Timestamp=2;
-  repeated DefenceZone Zones=3;
+    string DeviceID=1;
+    int64 Timestamp=2;
+    repeated DefenceZone Zones=3;
 }
 
 //设备状态， 广播
 message DeviceEventNotify{
-   int32 ChannelID=1;
-   string DeviceID=2;
-   int64 Timestamp=3;
-   FiberState EventType=4;
-   float ChannelLength=5;
+    int32 ChannelID=1;
+    string DeviceID=2;
+    int64 Timestamp=3;
+    FiberState EventType=4;
+    float ChannelLength=5;
 }
 
 //温度信号， 广播
 message TempSignalNotify{
-  string DeviceID=1;
-  int32 ChannelID=2;
-  float RealLength=3;
-  repeated float Signal=4;
-  int64 Timestamp=5;
+    string DeviceID=1;
+    int32 ChannelID=2;
+    float RealLength=3;
+    repeated float Signal=4;
+    int64 Timestamp=5;
+}
+
+//重置按钮和消音按钮的， 广播
+message ButtonNotify{
+    string DeviceID=1;
+    int64 Timestamp=2;
+    bool CancelSoundButton=3;
+    bool ResetButton=4;
 }
 
 //心跳
